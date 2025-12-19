@@ -5,7 +5,7 @@ public class Board {
     private final int boardSize = 8;
 
     // Bitmap for tiles in board
-    private long[][] board = new long[boardSize][boardSize];
+    private final long[][] bitboard = new long[boardSize][boardSize];
 
     // Bitmap for the location of those pieces on the board
     private long whitePawns;
@@ -32,39 +32,103 @@ public class Board {
         long tileAmmount = 0;
         for(int row = 0; row < boardSize; row++) {
             for(int column = 0; column < boardSize; column++) {
-                this.board[row][column] = 1L << tileAmmount;
+                this.bitboard[row][column] = 1L << tileAmmount;
                 tileAmmount++;
             }
         }
         
         // Setting pawns
         for(int column = 0; column < boardSize; column++) {
-            this.whitePawns |= this.board[6][column];
-            this.blackPawns |= this.board[1][column];
+            this.whitePawns |= this.bitboard[6][column];
+            this.blackPawns |= this.bitboard[1][column];
         }
         
         // Setting knights
-        this.whiteKnights = this.board[7][1] | this.board[7][6];
-        this.blackKnights = this.board[0][1] | this.board[0][6];
+        this.whiteKnights = this.bitboard[7][1] | this.bitboard[7][6];
+        this.blackKnights = this.bitboard[0][1] | this.bitboard[0][6];
 
         // Setting bishops
-        this.whiteBishops = this.board[7][2] | this.board[7][5];
-        this.blackBishops = this.board[0][2] | this.board[0][5];
+        this.whiteBishops = this.bitboard[7][2] | this.bitboard[7][5];
+        this.blackBishops = this.bitboard[0][2] | this.bitboard[0][5];
 
         // Setting rooks
-        this.whiteRooks = this.board[7][0] | this.board[7][7];
-        this.blackRooks = this.board[0][0] | this.board[0][7];
+        this.whiteRooks = this.bitboard[7][0] | this.bitboard[7][7];
+        this.blackRooks = this.bitboard[0][0] | this.bitboard[0][7];
 
         // Setting queens
-        this.whiteQueens = this.board[7][4];
-        this.blackQueens = this.board[0][4];
+        this.whiteQueens = this.bitboard[7][4];
+        this.blackQueens = this.bitboard[0][4];
 
         // Setting kings
-        this.whiteKing = this.board[7][3];
-        this.blackKing = this.board[0][3];
+        this.whiteKing = this.bitboard[7][3];
+        this.blackKing = this.bitboard[0][3];
         
         // Additional rules
         isWhiteTurn = true;   
         castlingRightsTiles = (this.whiteKing << 2 | this.whiteKing >> 2) | (this.blackKing << 2 | this.blackKing >> 2);
+    }
+    
+    public long[][] getBitboard() {
+        return this.bitboard;
+    }
+
+    public long getWhitePawns() {
+        return this.whitePawns;
+    }
+    
+    public long getWhiteKnights() {
+        return this.whiteKnights;
+    }
+
+    public long getWhiteBishops() {
+        return this.whiteBishops;
+    }
+    
+    public long getWhiteRooks() {
+        return this.whiteRooks;
+    }
+    
+    public long getWhiteQueens() {
+        return this.whiteQueens;
+    }
+    
+    public long getWhiteKing() {
+        return this.whiteKing;
+    }
+
+    public long getBlackPawns() {
+        return this.blackPawns;
+    }
+
+    public long getBlackKnights() {
+        return this.blackKnights;
+    }
+    
+    public long getBlackBishops() {
+        return this.blackBishops;
+    }
+    
+    public long getBlackRooks() {
+        return this.blackRooks;
+    }
+    
+    public long getBlackQueens() {
+        return this.blackQueens;
+    }
+    
+    public long getBlackKing() {
+        return this.blackKing;
+    }
+    
+    public boolean isWhiteTurn() {
+        return this.isWhiteTurn;
+    }
+
+    public long getCastlingRightsTiles() {
+        return this.castlingRightsTiles;
+    }
+
+    public long getEnpassantTiles() {
+        return this.enPassantTiles;
     }
 }
