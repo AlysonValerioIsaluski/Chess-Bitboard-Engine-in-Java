@@ -16,6 +16,7 @@ public class GameUI extends JFrame {
 
     private Image wPawnImg, wKnightImg, wBishopImg, wRookImg, wQueenImg, wKingImg;
     private Image bPawnImg, bKnightImg, bBishopImg, bRookImg, bQueenImg, bKingImg;
+    private Image greenCircleImg, orangeCircleImg;
 
     public GameUI(Board board) {
         this.board = board;
@@ -46,12 +47,18 @@ public class GameUI extends JFrame {
         bQueenImg = scaleSprite(loadSprite("/res/black-queen.png"), scaleFactor);
         bKingImg = scaleSprite(loadSprite("/res/black-king.png"), scaleFactor);
         
+        scaleFactor = 0.3;
+        greenCircleImg = scaleSprite(loadSprite("/res/green-circle.png"), scaleFactor);
+
+        orangeCircleImg = scaleSprite(loadSprite("/res/orange-circle.png"), scaleFactor);
+        
         BoardPanel boardPanel = new BoardPanel(
         this.board, this.boardImg,
         this.wPawnImg, this.wKnightImg, this.wBishopImg, 
         this.wRookImg, this.wQueenImg, this.wKingImg,
         this.bPawnImg, this.bKnightImg, this.bBishopImg, 
-        this.bRookImg, this.bQueenImg, this.bKingImg);
+        this.bRookImg, this.bQueenImg, this.bKingImg,
+        this.greenCircleImg, this.orangeCircleImg);
 
         this.add(boardPanel);
 
@@ -74,7 +81,6 @@ public class GameUI extends JFrame {
     private BufferedImage loadSprite(String path) {
         try {
             InputStream is = getClass().getResourceAsStream(path);
-            
             if (is == null) {
                 System.err.println("Error: Could not find resource at " + path);
                 return null;

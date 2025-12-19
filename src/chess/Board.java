@@ -131,4 +131,8 @@ public class Board {
     public long getEnpassantTiles() {
         return this.enPassantTiles;
     }
+
+    public int getBoardSize() {
+        return this.boardSize;
+    }
 }

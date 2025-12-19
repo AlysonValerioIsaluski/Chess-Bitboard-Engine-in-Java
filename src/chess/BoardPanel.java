@@ -5,23 +5,26 @@ import java.awt.image.*;
 import javax.swing.JPanel;
 
 public class BoardPanel extends JPanel {
-    // Prevention of magic number
-    private final int boardSize = 8;
-
     // Bitmap for tiles in board
     private Board board;
-    
-    private int[][][] tileboard = new int[boardSize][boardSize][2];
+    private final int boardSize;
+
+    private int[][][] tileboard;
 
     private BufferedImage boardImg;
     private Image wPawnImg, wKnightImg, wBishopImg, wRookImg, wQueenImg, wKingImg;
     private Image bPawnImg, bKnightImg, bBishopImg, bRookImg, bQueenImg, bKingImg;
+    private Image greenCircleImg, orangeCircleImg;
 
     public BoardPanel(Board board, BufferedImage boardImg,
         Image wPawnImg, Image wKnightImg, Image wBishopImg,
         Image wRookImg, Image wQueenImg, Image wKingImg,
         Image bPawnImg, Image bKnightImg, Image bBishopImg,
-       Image bRookImg, Image bQueenImg, Image bKingImg) {
+        Image bRookImg, Image bQueenImg, Image bKingImg,
+        Image greenCircleImg, Image orangeCircleImg) {
+       
+        boardSize = board.getBoardSize();
+        tileboard = new int[boardSize][boardSize][2];
         
         this.board = board;
         this.boardImg = boardImg;
@@ -39,6 +42,9 @@ public class BoardPanel extends JPanel {
         this.bRookImg = bRookImg;
         this.bQueenImg = bQueenImg;
         this.bKingImg = bKingImg;
+
+        this.greenCircleImg = greenCircleImg;
+        this.orangeCircleImg = orangeCircleImg;
         
         // Alignment grid for displaying the pieces on the board
         for(int row = 0; row < boardSize; row++) {
@@ -60,7 +66,24 @@ public class BoardPanel extends JPanel {
         }
 
         long[][] bitboard = board.getBitboard();
+        long capturablePieces = board.getWhitePawns() | board.getWhiteKnights() | board.getWhiteBishops() |
+        board.getWhiteRooks() | board.getWhiteQueens() | board.getWhiteKing() |
+        board.getBlackPawns() | board.getBlackKnights() | board.getBlackBishops() |
+        board.getBlackRooks() | board.getBlackQueens() | board.getBlackKing();
 
+        long possibleMoves = MoveGenerator.calculatePossibleMoves('b', this.board, 4, 4, 'w');       
+        for(int row = 0; row < boardSize; row++) {
+            for(int column = 0; column < boardSize; column++) {
+                if((possibleMoves & bitboard[row][column]) != 0) {
+                    if((capturablePieces & bitboard[row][column]) != 0)
+                        g.drawImage(this.orangeCircleImg, tileboard[row][column][0], tileboard[row][column][1], this);
+                    else
+                        g.drawImage(this.greenCircleImg, tileboard[row][column][0], tileboard[row][column][1], this);
+
+                }
+            }
+        }
+    
         // Drawing pieces
         // White pawn
         if (this.wPawnImg != null) {
@@ -125,6 +148,7 @@ public class BoardPanel extends JPanel {
             for(int row = 0; row < boardSize; row++) {
                 for(int column = 0; column < boardSize; column++) {
                     if((whiteKing & bitboard[row][column]) != 0) {
+
                         g.drawImage(this.wKingImg, tileboard[row][column][0], tileboard[row][column][1], this);
                         break;
                     }
