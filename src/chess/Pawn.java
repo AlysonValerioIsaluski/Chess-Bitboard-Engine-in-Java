@@ -18,12 +18,6 @@ abstract public class Pawn {
         if (color == 'w') {
             blockedPieces = whitePieces;
             capturablePieces = blackPieces;
-        
-            // Checks if there are capturable pieces on the diagonal
-            if(pawnColumn != 0 && (capturablePieces & bitboard[pawnRow-1][pawnColumn-1]) != 0)
-                possibleMoves |= bitboard[pawnRow-1][pawnColumn-1];
-            if(pawnColumn != boardSize-1 && (capturablePieces & bitboard[pawnRow-1][pawnColumn+1]) != 0)
-                possibleMoves |= bitboard[pawnRow-1][pawnColumn+1];
             
             // Checks if there is a piece in front
             if((blockedPieces & bitboard[pawnRow-1][pawnColumn]) != 0 || (capturablePieces & bitboard[pawnRow-1][pawnColumn]) != 0)
@@ -43,12 +37,6 @@ abstract public class Pawn {
             blockedPieces = blackPieces;
             capturablePieces = whitePieces;
 
-            // Checks if there are capturable pieces on the diagonal
-            if(pawnColumn != 0 && (capturablePieces & bitboard[pawnRow+1][pawnColumn-1]) != 0)
-                possibleMoves |= bitboard[pawnRow+1][pawnColumn-1];
-            if(pawnColumn != boardSize-1 && (capturablePieces & bitboard[pawnRow+1][pawnColumn+1]) != 0)
-                possibleMoves |= bitboard[pawnRow+1][pawnColumn+1];
-
             // Checks if there is a piece in front
             if((blockedPieces & bitboard[pawnRow+1][pawnColumn]) != 0 || (capturablePieces & bitboard[pawnRow+1][pawnColumn]) != 0)
                 return possibleMoves;
@@ -65,5 +53,37 @@ abstract public class Pawn {
         }
         
         return possibleMoves;
+    }
+
+    public static long calculatePossibleCaptures(Board board, int pawnRow, int pawnColumn, char color) {
+        long[][] bitboard = board.getBitboard();
+        long possibleCaptures = 0L;
+
+        long whitePieces = board.getWhitePieces();
+        long blackPieces = board.getBlackPieces();
+
+        long capturablePieces;
+        int boardSize = board.getBoardSize();
+        
+        if (color == 'w') {
+            capturablePieces = blackPieces;
+        
+            // Checks if there are capturable pieces on the diagonal
+            if(pawnColumn != 0 && (capturablePieces & bitboard[pawnRow-1][pawnColumn-1]) != 0)
+                possibleCaptures |= bitboard[pawnRow-1][pawnColumn-1];
+            if(pawnColumn != boardSize-1 && (capturablePieces & bitboard[pawnRow-1][pawnColumn+1]) != 0)
+                possibleCaptures |= bitboard[pawnRow-1][pawnColumn+1];
+        }
+        else {
+            capturablePieces = whitePieces;
+
+            // Checks if there are capturable pieces on the diagonal
+            if(pawnColumn != 0 && (capturablePieces & bitboard[pawnRow+1][pawnColumn-1]) != 0)
+                possibleCaptures |= bitboard[pawnRow+1][pawnColumn-1];
+            if(pawnColumn != boardSize-1 && (capturablePieces & bitboard[pawnRow+1][pawnColumn+1]) != 0)
+                possibleCaptures |= bitboard[pawnRow+1][pawnColumn+1];
+        }
+        
+        return possibleCaptures;
     }
 }

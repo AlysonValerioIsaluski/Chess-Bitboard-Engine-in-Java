@@ -7,8 +7,8 @@ import javax.imageio.*;
 import javax.swing.*;
 
 public class GameWindow extends JFrame {
-    private Board board;
-    private GameLogic gameLogic;
+    private final Board board;
+    private final GameLogic gameLogic;
 
     private final int frameWidth;
     private final int frameHeight;
@@ -16,7 +16,7 @@ public class GameWindow extends JFrame {
     private final BufferedImage boardImg;
     private final Image wPawnImg, wKnightImg, wBishopImg, wRookImg, wQueenImg, wKingImg;
     private final Image bPawnImg, bKnightImg, bBishopImg, bRookImg, bQueenImg, bKingImg;
-    private final Image greenCircleImg, orangeCircleImg, greenSquareImg;
+    private final Image greenCircleImg, orangeCircleImg, greenSquareImg, redSquareImg;
 
     public GameWindow(Board board, GameLogic gameLogic) {
         this.board = board;
@@ -53,6 +53,8 @@ public class GameWindow extends JFrame {
         orangeCircleImg = scaleSprite(loadSprite("/res/orange-circle.png"), scaleFactor);
         scaleFactor = 0.075;
         greenSquareImg = scaleSprite(loadSprite("/res/green-square.png"), scaleFactor);
+        scaleFactor = 0.032;
+        redSquareImg = scaleSprite(loadSprite("/res/red-square.png"), scaleFactor);
 
         BoardPanel boardPanel = new BoardPanel(
         this.board, this.gameLogic, this.boardImg,
@@ -60,7 +62,8 @@ public class GameWindow extends JFrame {
         this.wRookImg, this.wQueenImg, this.wKingImg,
         this.bPawnImg, this.bKnightImg, this.bBishopImg, 
         this.bRookImg, this.bQueenImg, this.bKingImg,
-        this.greenCircleImg, this.orangeCircleImg, this.greenSquareImg);
+        this.greenCircleImg, this.orangeCircleImg,
+        this.greenSquareImg, this.redSquareImg);
 
         this.add(boardPanel);
 

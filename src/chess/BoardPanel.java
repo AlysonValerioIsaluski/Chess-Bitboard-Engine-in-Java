@@ -15,28 +15,33 @@ public class BoardPanel extends JPanel {
     private final int TILE_OFFSET = 64;
     private final int TILE_SIZE = 96;
 
-    private char selectedPiece = '0';
+    private char selectedPiece;
     private long selectedPiecePossibleMoves, enemyPieces;
     private int selectedPieceRow, selectedPieceColumn;
 
+    private boolean inCheck;
 
     private final BufferedImage boardImg;
     private final Image wPawnImg, wKnightImg, wBishopImg, wRookImg, wQueenImg, wKingImg;
     private final Image bPawnImg, bKnightImg, bBishopImg, bRookImg, bQueenImg, bKingImg;
-    private final Image greenCircleImg, orangeCircleImg, greenSquareImg;
+    private final Image greenCircleImg, orangeCircleImg, greenSquareImg, redSquareImg;
 
     public BoardPanel(Board board, GameLogic gameLogic, BufferedImage boardImg,
         Image wPawnImg, Image wKnightImg, Image wBishopImg,
         Image wRookImg, Image wQueenImg, Image wKingImg,
         Image bPawnImg, Image bKnightImg, Image bBishopImg,
         Image bRookImg, Image bQueenImg, Image bKingImg,
-        Image greenCircleImg, Image orangeCircleImg, Image greenSquareImg) {
+        Image greenCircleImg, Image orangeCircleImg,
+        Image greenSquareImg, Image redSquareImg) {
        
         this.board = board;
         this.boardSize = board.getBoardSize();
         this.bitboard = board.getBitboard();
 
         tileboard = new int[boardSize][boardSize][2];
+
+        this.selectedPiece = '0';
+        this.inCheck = false;
         
         this.boardImg = boardImg;
 
@@ -57,6 +62,7 @@ public class BoardPanel extends JPanel {
         this.greenCircleImg = greenCircleImg;
         this.orangeCircleImg = orangeCircleImg;
         this.greenSquareImg = greenSquareImg;
+        this.redSquareImg = redSquareImg;
         
         // Alignment grid for displaying the pieces on the board
         for(int row = 0; row < boardSize; row++) {
@@ -81,6 +87,7 @@ public class BoardPanel extends JPanel {
                 enemyPieces = gameLogic.getEnemyPieces();
                 selectedPieceRow = gameLogic.getSelectedPieceRow();
                 selectedPieceColumn = gameLogic.getSelectedPieceColumn();
+                inCheck = gameLogic.getCheckStatus();
 
                 repaint();
             }
@@ -99,6 +106,25 @@ public class BoardPanel extends JPanel {
 
         // Drawing selected piece marker
         if(this.selectedPiece != '0') {
+            // Is king in check
+            if(this.selectedPiece != 'k' && this.inCheck) {
+                for(int row = 0; row < boardSize; row++) {
+                    for(int column = 0; column < boardSize; column++) {
+                        if(board.isWhiteTurn()) {
+                            if((board.getWhiteKing() & bitboard[row][column]) != 0) {
+                                g.drawImage(this.redSquareImg, tileboard[row][column][0]+3, tileboard[row][column][1]+3, this);
+                                break;
+                            }
+                        }
+                        else {
+                            if((board.getBlackKing() & bitboard[row][column]) != 0) {
+                                g.drawImage(this.redSquareImg, tileboard[row][column][0]+3, tileboard[row][column][1]+3, this);
+                                break;
+                            }
+                        }
+                    }  
+                }
+            }
             g.drawImage(this.greenSquareImg, tileboard[selectedPieceRow][selectedPieceColumn][0]+3, tileboard[selectedPieceRow][selectedPieceColumn][1]+3, this);
             
             // Drawing markers where the selected piece can move

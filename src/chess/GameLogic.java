@@ -1,18 +1,23 @@
 package chess;
 
 public class GameLogic {
-    private Board board;
+    private final Board board;
     private final int boardSize;
     private final long[][] bitboard;
 
-    private char selectedPiece = '0';
+    private char selectedPiece;
     private long selectedPiecePossibleMoves, enemyPieces;
     private int selectedPieceRow, selectedPieceColumn;
+
+    private boolean inCheck;
 
     public GameLogic(Board board) {
         this.board = board;
         this.boardSize = board.getBoardSize();
         this.bitboard = board.getBitboard();
+
+        this.selectedPiece = '0';
+        this.inCheck = false;
     }
 
     public void handleTileSelection(int row, int column) {
@@ -76,6 +81,7 @@ public class GameLogic {
                 // Moves selected piece to target tile that is a possible move for that selected piece
                 movePiece(this.selectedPiece, selectedPieceRow, selectedPieceColumn, row, column, 'w');
                 board.setWhiteTurn(false);
+                handleCheck('w');
             }
 
             // If player has selected anything else, the selection will just clear
@@ -126,6 +132,7 @@ public class GameLogic {
                 // Moves selected piece to target tile that is a possible move for that selected piece
                 movePiece(this.selectedPiece, selectedPieceRow, selectedPieceColumn, row, column, 'b');
                 board.setWhiteTurn(true);
+                handleCheck('b');
             }
 
             // If player has selected anything else, the selection will just clear
@@ -191,6 +198,69 @@ public class GameLogic {
         }
     }
 
+    // If king can be attack by any enemy piece, the player's king is in check
+    private void handleCheck(char color) {
+        Long attackingTiles = this.getAttackingTiles(color);
+        
+        if(color != 'w') {
+            if((board.getWhiteKing() & attackingTiles) != 0)
+                this.inCheck = true;
+            else
+                this.inCheck = false;
+        }
+        else {
+            System.out.println("Black King: " + board.getBlackKing());
+            if((board.getBlackKing() & attackingTiles) != 0)
+                this.inCheck = true;
+            else
+                this.inCheck = false;
+        }
+    }
+    
+    private long getAttackingTiles(char color) {
+        int row, column;
+        long attackingTiles = 0L;
+
+        if(color == 'w') {
+            for(row = 0; row < boardSize; row++) {
+                for(column = 0; column < boardSize; column++) {
+                    if((board.getWhitePawns() & bitboard[row][column]) != 0)
+                        attackingTiles |= MoveGenerator.calculatePossibleCaptures('p', this.board, row, column, color);
+                    else if((board.getWhiteKnights() & bitboard[row][column]) != 0)
+                        attackingTiles |= MoveGenerator.calculatePossibleCaptures('n', this.board, row, column, color);
+                    else if((board.getWhiteBishops() & bitboard[row][column]) != 0)
+                        attackingTiles |= MoveGenerator.calculatePossibleCaptures('b', this.board, row, column, color);
+                    else if((board.getWhiteRooks() & bitboard[row][column]) != 0)
+                        attackingTiles |= MoveGenerator.calculatePossibleCaptures('r', this.board, row, column, color);
+                    else if((board.getWhiteQueens() & bitboard[row][column]) != 0)
+                        attackingTiles |= MoveGenerator.calculatePossibleCaptures('q', this.board, row, column, color);
+                    else if((board.getWhiteKing() & bitboard[row][column]) != 0)
+                        attackingTiles |= MoveGenerator.calculatePossibleCaptures('k', this.board, row, column, color);
+                }
+            }
+        }
+        else {
+            for(row = 0; row < boardSize; row++) {
+                for(column = 0; column < boardSize; column++) {
+                    if((board.getBlackPawns() & bitboard[row][column]) != 0)
+                        attackingTiles |= MoveGenerator.calculatePossibleCaptures('p', this.board, row, column, color);
+                    else if((board.getBlackKnights() & bitboard[row][column]) != 0)
+                        attackingTiles |= MoveGenerator.calculatePossibleCaptures('n', this.board, row, column, color);
+                    else if((board.getBlackBishops() & bitboard[row][column]) != 0)
+                        attackingTiles |= MoveGenerator.calculatePossibleCaptures('b', this.board, row, column, color);
+                    else if((board.getBlackRooks() & bitboard[row][column]) != 0)
+                        attackingTiles |= MoveGenerator.calculatePossibleCaptures('r', this.board, row, column, color);
+                    else if((board.getBlackQueens() & bitboard[row][column]) != 0)
+                        attackingTiles |= MoveGenerator.calculatePossibleCaptures('q', this.board, row, column, color);
+                    else if((board.getBlackKing() & bitboard[row][column]) != 0)
+                        attackingTiles |= MoveGenerator.calculatePossibleCaptures('k', this.board, row, column, color);
+                }
+            }
+        }
+
+        return attackingTiles;
+    }
+
     public char getSelectedPiece() {
         return selectedPiece;
     }
@@ -209,5 +279,9 @@ public class GameLogic {
 
     public int getSelectedPieceColumn() {
         return selectedPieceColumn;
+    }
+
+    public boolean getCheckStatus() {
+        return inCheck;
     }
 }
