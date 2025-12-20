@@ -248,12 +248,14 @@ public class BoardPanel extends JPanel {
         int row = mouseY / TILE_SIZE;
 
         // Check if tile clicked is bounded inside the board
-        if (row >= 0 && row <= this.boardSize && column >= 0 && column <= this.boardSize) {
+        if (row > 0 && row <= this.boardSize && column > 0 && column <= this.boardSize) {
             selectSquare(row-1, column-1);
             System.out.println("Tile selected: (" + (row-1) + ", " + (column-1) + ")");
         }
         else
-            this.selectedPiecePossibleMoves = 0L;
+            this.selectedPiece = '0';
+        
+        repaint();
     }
 
     private void selectSquare(int row, int column) {
@@ -310,10 +312,9 @@ public class BoardPanel extends JPanel {
                 this.selectedPiecePossibleMoves = MoveGenerator.calculatePossibleMoves(this.selectedPiece, this.board, row, column, 'b');
             }
         }
+        
         this.selectedPieceRow = row;
         this.selectedPieceColumn = column;
-
-        repaint();
     }
 }
 

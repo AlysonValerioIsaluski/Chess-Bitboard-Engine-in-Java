@@ -23,7 +23,7 @@ public class Board {
     private long blackKing;
 
     // Additional rules
-    private boolean isWhiteTurn; // True if white's turn and False if black's turn
+    private boolean isWhiteTurn; // True if white's turn and false if black's turn
     private long enPassantTiles; // Tile behind capturable pawn used as reference
     private long castlingRightsTiles; // Tile two tiles away from king used as reference
 
