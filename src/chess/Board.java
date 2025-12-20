@@ -145,4 +145,66 @@ public class Board {
     public int getBoardSize() {
         return this.boardSize;
     }
+
+
+
+    public void setWhitePawns(long whitePawns) {
+        this.whitePawns = whitePawns;
+    }
+
+    public void setWhiteKnights(long whiteKnights) {
+        this.whiteKnights = whiteKnights;
+    }
+
+    public void setWhiteBishops(long whiteBishops) {
+        this.whiteBishops = whiteBishops;
+    }
+
+    public void setWhiteRooks(long whiteRooks) {
+        this.whiteRooks = whiteRooks;
+    }
+
+    public void setWhiteQueens(long whiteQueens) {
+        this.whiteQueens = whiteQueens;
+    }
+
+    public void setWhiteKing(long whiteKing) {
+        this.whiteKing = whiteKing;
+    }
+
+    public void setBlackPawns(long blackPawns) {
+        this.blackPawns = blackPawns;
+    }
+
+    public void setBlackKnights(long blackKnights) {
+        this.blackKnights = blackKnights;
+    }
+
+    public void setBlackBishops(long blackBishops) {
+        this.blackBishops = blackBishops;
+    }
+
+    public void setBlackRooks(long blackRooks) {
+        this.blackRooks = blackRooks;
+    }
+
+    public void setBlackQueens(long blackQueens) {
+        this.blackQueens = blackQueens;
+    }
+
+    public void setBlackKing(long blackKing) {
+        this.blackKing = blackKing;
+    }
+
+    public void setWhiteTurn(boolean isWhiteTurn) {
+        this.isWhiteTurn = isWhiteTurn;
+    }
+
+    public void setCastlingRightsTiles(long castlingRightsTiles) {
+        this.castlingRightsTiles = castlingRightsTiles;
+    }
+
+    public void setEnpassantTiles(long enPassantTiles) {
+        this.enPassantTiles = enPassantTiles;
+    }
 }

@@ -8,6 +8,10 @@ public class BoardPanel extends JPanel {
     // Bitmap for tiles in board
     private final Board board;
     private final int boardSize;
+    private final long[][] bitboard;
+
+    // Saves coordinates in pixels of the tiles in the board
+    private final int[][][] tileboard;
     private final int TILE_OFFSET = 64;
     private final int TILE_SIZE = 96;
 
@@ -15,25 +19,25 @@ public class BoardPanel extends JPanel {
     private long selectedPiecePossibleMoves, enemyPieces;
     private int selectedPieceRow, selectedPieceColumn;
 
-    // Saves coordinates in pixels of the tiles in the board
-    private final int[][][] tileboard;
 
     private final BufferedImage boardImg;
     private final Image wPawnImg, wKnightImg, wBishopImg, wRookImg, wQueenImg, wKingImg;
     private final Image bPawnImg, bKnightImg, bBishopImg, bRookImg, bQueenImg, bKingImg;
     private final Image greenCircleImg, orangeCircleImg, greenSquareImg;
 
-    public BoardPanel(Board board, BufferedImage boardImg,
+    public BoardPanel(Board board, GameLogic gameLogic, BufferedImage boardImg,
         Image wPawnImg, Image wKnightImg, Image wBishopImg,
         Image wRookImg, Image wQueenImg, Image wKingImg,
         Image bPawnImg, Image bKnightImg, Image bBishopImg,
         Image bRookImg, Image bQueenImg, Image bKingImg,
         Image greenCircleImg, Image orangeCircleImg, Image greenSquareImg) {
        
-        boardSize = board.getBoardSize();
+        this.board = board;
+        this.boardSize = board.getBoardSize();
+        this.bitboard = board.getBitboard();
+
         tileboard = new int[boardSize][boardSize][2];
         
-        this.board = board;
         this.boardImg = boardImg;
 
         this.wPawnImg = wPawnImg;
@@ -66,7 +70,19 @@ public class BoardPanel extends JPanel {
         this.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                handleMouseClick(e.getX() + TILE_OFFSET, e.getY() + TILE_OFFSET);
+                // Gets clicked tile
+                int column = (e.getX() + TILE_OFFSET) / TILE_SIZE;
+                int row = (e.getY() + TILE_OFFSET) / TILE_SIZE;
+                
+                gameLogic.handleTileSelection(row, column);
+
+                selectedPiece = gameLogic.getSelectedPiece();
+                selectedPiecePossibleMoves = gameLogic.getSelectedPiecePossibleMoves();
+                enemyPieces = gameLogic.getEnemyPieces();
+                selectedPieceRow = gameLogic.getSelectedPieceRow();
+                selectedPieceColumn = gameLogic.getSelectedPieceColumn();
+
+                repaint();
             }
         });
     }
@@ -75,7 +91,6 @@ public class BoardPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        long[][] bitboard = board.getBitboard();
         
         // Drawing board
         if (this.boardImg != null) {
@@ -238,83 +253,6 @@ public class BoardPanel extends JPanel {
                 }
             }            
         }
-
-    }
-
-    // Does click logic depending on click location
-    private void handleMouseClick(int mouseX, int mouseY) {
-        // Gets clicked tile
-        int column = mouseX / TILE_SIZE;
-        int row = mouseY / TILE_SIZE;
-
-        // Check if tile clicked is bounded inside the board
-        if (row > 0 && row <= this.boardSize && column > 0 && column <= this.boardSize) {
-            selectSquare(row-1, column-1);
-            System.out.println("Tile selected: (" + (row-1) + ", " + (column-1) + ")");
-        }
-        else
-            this.selectedPiece = '0';
-        
-        repaint();
-    }
-
-    private void selectSquare(int row, int column) {
-        // Sets selected piece as none
-        this.selectedPiece = '0';
-        long[][] bitboard = board.getBitboard();
-
-        // Defines tiles with pieces of the same color
-        long whitePieces = board.getWhitePieces();
-        
-        // Defines tiles with enemy pieces
-        long blackPieces = board.getBlackPieces();
-        long playerPieces;
-
-        if (board.isWhiteTurn()) {
-            playerPieces = whitePieces;
-            this.enemyPieces = blackPieces;
-
-            if((playerPieces & bitboard[row][column]) != 0) {
-                if(((playerPieces & board.getWhitePawns()) & bitboard[row][column]) != 0)
-                    this.selectedPiece = 'p';
-                else if(((playerPieces & board.getWhiteKnights()) & bitboard[row][column]) != 0)
-                    this.selectedPiece = 'n';
-                else if(((playerPieces & board.getWhiteBishops()) & bitboard[row][column]) != 0)
-                    this.selectedPiece = 'b';
-                else if(((playerPieces & board.getWhiteRooks()) & bitboard[row][column]) != 0)
-                    this.selectedPiece = 'r';
-                else if(((playerPieces & board.getWhiteQueens()) & bitboard[row][column]) != 0)
-                    this.selectedPiece = 'q';
-                else if(((playerPieces & board.getWhiteKing()) & bitboard[row][column]) != 0)
-                    this.selectedPiece = 'k';
-                
-                this.selectedPiecePossibleMoves = MoveGenerator.calculatePossibleMoves(this.selectedPiece, this.board, row, column, 'w');
-            }
-        }
-        else {
-            playerPieces = blackPieces;
-            this.enemyPieces = whitePieces;
-
-            if((playerPieces & bitboard[row][column]) != 0) {
-                if(((playerPieces & board.getBlackPawns()) & bitboard[row][column]) != 0)
-                    this.selectedPiece = 'p';
-                else if(((playerPieces & board.getBlackKnights()) & bitboard[row][column]) != 0)
-                    this.selectedPiece = 'n';
-                else if(((playerPieces & board.getBlackBishops()) & bitboard[row][column]) != 0)
-                    this.selectedPiece = 'b';
-                else if(((playerPieces & board.getBlackRooks()) & bitboard[row][column]) != 0)
-                    this.selectedPiece = 'r';
-                else if(((playerPieces & board.getBlackQueens()) & bitboard[row][column]) != 0)
-                    this.selectedPiece = 'q';
-                else if(((playerPieces & board.getBlackKing()) & bitboard[row][column]) != 0)
-                    this.selectedPiece = 'k';
-                
-                this.selectedPiecePossibleMoves = MoveGenerator.calculatePossibleMoves(this.selectedPiece, this.board, row, column, 'b');
-            }
-        }
-        
-        this.selectedPieceRow = row;
-        this.selectedPieceColumn = column;
     }
 }
 
