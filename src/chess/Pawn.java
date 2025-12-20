@@ -45,9 +45,9 @@ abstract public class Pawn {
             capturablePieces = whitePieces;
 
             // Checks if there are capturable pieces on the diagonal
-            if(pawnColumn != 0 && (capturablePieces & bitboard[pawnRow-1][pawnColumn-1]) != 0)
+            if(pawnColumn != 0 && (capturablePieces & bitboard[pawnRow+1][pawnColumn-1]) != 0)
                 possibleMoves |= bitboard[pawnRow+1][pawnColumn-1];
-            if(pawnColumn != boardSize && (capturablePieces & bitboard[pawnRow-1][pawnColumn+1]) != 0)
+            if(pawnColumn != boardSize && (capturablePieces & bitboard[pawnRow+1][pawnColumn+1]) != 0)
                 possibleMoves |= bitboard[pawnRow+1][pawnColumn+1];
 
             // Checks if there is a piece in front
