@@ -19,13 +19,9 @@ abstract public class Knight {
         long[][] bitboard = board.getBitboard();
         long possibleMoves = 0L;
 
-        // Defines tiles with pieces of the same color
-        long whitePieces = board.getWhitePawns() | board.getWhiteKnights() | board.getWhiteBishops() |
-        board.getWhiteRooks() | board.getWhiteQueens() | board.getWhiteKing();
+        long whitePieces = board.getWhitePieces();
             
-        // Defines tiles with enemy pieces
-        long blackPieces = board.getBlackPawns() | board.getBlackKnights() | board.getBlackBishops() |
-        board.getBlackRooks() | board.getBlackQueens() | board.getBlackKing();
+        long blackPieces = board.getBlackPieces();
 
         long blockedPieces;
         if (color == 'w')

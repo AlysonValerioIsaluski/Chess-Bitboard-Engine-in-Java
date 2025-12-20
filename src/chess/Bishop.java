@@ -8,13 +8,9 @@ abstract public class Bishop {
         long[][] bitboard = board.getBitboard();
         long possibleMoves = 0L;
 
-        // Defines tiles with pieces of the same color
-        long whitePieces = board.getWhitePawns() | board.getWhiteKnights() | board.getWhiteBishops() |
-        board.getWhiteRooks() | board.getWhiteQueens() | board.getWhiteKing();
-            
-        // Defines tiles with enemy pieces
-        long blackPieces = board.getBlackPawns() | board.getBlackKnights() | board.getBlackBishops() |
-        board.getBlackRooks() | board.getBlackQueens() | board.getBlackKing();
+        long whitePieces = board.getWhitePieces();
+
+        long blackPieces = board.getBlackPieces();
 
         long blockedPieces;
         long capturablePieces;

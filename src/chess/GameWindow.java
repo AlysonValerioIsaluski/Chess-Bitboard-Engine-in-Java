@@ -6,19 +6,18 @@ import java.io.*;
 import javax.imageio.*;
 import javax.swing.*;
 
-public class GameUI extends JFrame {
+public class GameWindow extends JFrame {
     private Board board;
 
-    private int frameWidth;
-    private int frameHeight;
+    private final int frameWidth;
+    private final int frameHeight;
 
-    private BufferedImage boardImg;
+    private final BufferedImage boardImg;
+    private final Image wPawnImg, wKnightImg, wBishopImg, wRookImg, wQueenImg, wKingImg;
+    private final Image bPawnImg, bKnightImg, bBishopImg, bRookImg, bQueenImg, bKingImg;
+    private final Image greenCircleImg, orangeCircleImg, greenSquareImg;
 
-    private Image wPawnImg, wKnightImg, wBishopImg, wRookImg, wQueenImg, wKingImg;
-    private Image bPawnImg, bKnightImg, bBishopImg, bRookImg, bQueenImg, bKingImg;
-    private Image greenCircleImg, orangeCircleImg;
-
-    public GameUI(Board board) {
+    public GameWindow(Board board) {
         this.board = board;
 
         frameWidth = 1000;
@@ -49,16 +48,17 @@ public class GameUI extends JFrame {
         
         scaleFactor = 0.3;
         greenCircleImg = scaleSprite(loadSprite("/res/green-circle.png"), scaleFactor);
-
         orangeCircleImg = scaleSprite(loadSprite("/res/orange-circle.png"), scaleFactor);
-        
+        scaleFactor = 0.075;
+        greenSquareImg = scaleSprite(loadSprite("/res/green-square.png"), scaleFactor);
+
         BoardPanel boardPanel = new BoardPanel(
         this.board, this.boardImg,
         this.wPawnImg, this.wKnightImg, this.wBishopImg, 
         this.wRookImg, this.wQueenImg, this.wKingImg,
         this.bPawnImg, this.bKnightImg, this.bBishopImg, 
         this.bRookImg, this.bQueenImg, this.bKingImg,
-        this.greenCircleImg, this.orangeCircleImg);
+        this.greenCircleImg, this.orangeCircleImg, this.greenSquareImg);
 
         this.add(boardPanel);
 
@@ -89,7 +89,6 @@ public class GameUI extends JFrame {
             return ImageIO.read(is);
         } catch (IOException e) {
             System.err.println("Error: Failed to load image at " + path);
-            e.printStackTrace();
             return null;
         }
     }

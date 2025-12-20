@@ -12,15 +12,11 @@ abstract public class King {
 
     public static long calculatePossibleMoves(Board board, int kingRow, int kingColumn, char color) {
         long[][] bitboard = board.getBitboard();
-        long possibleMoves = 0L;
+        long possibleMoves;
 
-        // Defines tiles with pieces of the same color
-        long whitePieces = board.getWhitePawns() | board.getWhiteKnights() | board.getWhiteBishops() |
-        board.getWhiteRooks() | board.getWhiteQueens() | board.getWhiteKing();
-            
-        // Defines tiles with enemy pieces
-        long blackPieces = board.getBlackPawns() | board.getBlackKnights() | board.getBlackBishops() |
-        board.getBlackRooks() | board.getBlackQueens() | board.getBlackKing();
+        long whitePieces = board.getWhitePieces();
+
+        long blackPieces = board.getBlackPieces();
         
         long blockedPieces;
         if (color == 'w')

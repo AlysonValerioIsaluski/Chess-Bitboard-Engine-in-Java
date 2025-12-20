@@ -8,13 +8,9 @@ abstract public class Pawn {
         long[][] bitboard = board.getBitboard();
         long possibleMoves = 0L;
 
-        // Defines tiles with pieces of the same color
-        long whitePieces = board.getWhitePawns() | board.getWhiteKnights() | board.getWhiteBishops() |
-        board.getWhiteRooks() | board.getWhiteQueens() | board.getWhiteKing() | board.getEnpassantTiles();
+        long whitePieces = board.getWhitePieces();
             
-        // Defines tiles with enemy pieces
-        long blackPieces = board.getBlackPawns() | board.getBlackKnights() | board.getBlackBishops() |
-        board.getBlackRooks() | board.getBlackQueens() | board.getBlackKing() | board.getEnpassantTiles();
+        long blackPieces = board.getBlackPieces();
 
         long blockedPieces;
         long capturablePieces;
@@ -27,7 +23,7 @@ abstract public class Pawn {
             // Checks if there are capturable pieces on the diagonal
             if(pawnColumn != 0 && (capturablePieces & bitboard[pawnRow-1][pawnColumn-1]) != 0)
                 possibleMoves |= bitboard[pawnRow-1][pawnColumn-1];
-            if(pawnColumn != boardSize && (capturablePieces & bitboard[pawnRow-1][pawnColumn+1]) != 0)
+            if(pawnColumn != boardSize-1 && (capturablePieces & bitboard[pawnRow-1][pawnColumn+1]) != 0)
                 possibleMoves |= bitboard[pawnRow-1][pawnColumn+1];
             
             // Checks if there is a piece in front
@@ -47,7 +43,7 @@ abstract public class Pawn {
             // Checks if there are capturable pieces on the diagonal
             if(pawnColumn != 0 && (capturablePieces & bitboard[pawnRow+1][pawnColumn-1]) != 0)
                 possibleMoves |= bitboard[pawnRow+1][pawnColumn-1];
-            if(pawnColumn != boardSize && (capturablePieces & bitboard[pawnRow+1][pawnColumn+1]) != 0)
+            if(pawnColumn != boardSize-1 && (capturablePieces & bitboard[pawnRow+1][pawnColumn+1]) != 0)
                 possibleMoves |= bitboard[pawnRow+1][pawnColumn+1];
 
             // Checks if there is a piece in front

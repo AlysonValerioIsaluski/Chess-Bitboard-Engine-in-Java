@@ -64,7 +64,7 @@ public class Board {
         this.blackKing = this.bitboard[0][4];
         
         // Additional rules
-        isWhiteTurn = true;   
+        isWhiteTurn = true;
         castlingRightsTiles = (this.whiteKing << 2 | this.whiteKing >> 2) | (this.blackKing << 2 | this.blackKing >> 2);
     }
     
@@ -96,6 +96,11 @@ public class Board {
         return this.whiteKing;
     }
 
+    public long getWhitePieces() {
+        return this.whitePawns | this.whiteKnights | this.whiteBishops |
+        this.whiteRooks | this.whiteQueens | this.whiteKing;
+    }
+
     public long getBlackPawns() {
         return this.blackPawns;
     }
@@ -118,6 +123,11 @@ public class Board {
     
     public long getBlackKing() {
         return this.blackKing;
+    }
+
+    public long getBlackPieces() {
+        return this.blackPawns | this.blackKnights | this.blackBishops |
+        this.blackRooks | this.blackQueens | this.blackKing;
     }
     
     public boolean isWhiteTurn() {

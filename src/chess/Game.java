@@ -5,6 +5,7 @@ public class Game {
     public static void main(String[] args) {
         Board board = new Board();
 
-        GameUI gameUI = new GameUI(board);
+        @SuppressWarnings("unused")
+        GameWindow gameWindow = new GameWindow(board);
     }
 }
