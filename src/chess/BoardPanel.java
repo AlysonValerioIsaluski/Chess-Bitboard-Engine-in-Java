@@ -104,27 +104,28 @@ public class BoardPanel extends JPanel {
             g.drawImage(this.boardImg, 0, 0, this);
         }
 
+        // Drawing check marked if king is in check
+        if(this.selectedPiece != 'k' && this.inCheck) {
+            for(int row = 0; row < boardSize; row++) {
+                for(int column = 0; column < boardSize; column++) {
+                    if(board.isWhiteTurn()) {
+                        if((board.getWhiteKing() & bitboard[row][column]) != 0) {
+                            g.drawImage(this.redSquareImg, tileboard[row][column][0]+3, tileboard[row][column][1]+3, this);
+                            break;
+                        }
+                    }
+                    else {
+                        if((board.getBlackKing() & bitboard[row][column]) != 0) {
+                            g.drawImage(this.redSquareImg, tileboard[row][column][0]+3, tileboard[row][column][1]+3, this);
+                            break;
+                        }
+                    }
+                }  
+            }
+        }
+
         // Drawing selected piece marker
         if(this.selectedPiece != '0') {
-            // Is king in check
-            if(this.selectedPiece != 'k' && this.inCheck) {
-                for(int row = 0; row < boardSize; row++) {
-                    for(int column = 0; column < boardSize; column++) {
-                        if(board.isWhiteTurn()) {
-                            if((board.getWhiteKing() & bitboard[row][column]) != 0) {
-                                g.drawImage(this.redSquareImg, tileboard[row][column][0]+3, tileboard[row][column][1]+3, this);
-                                break;
-                            }
-                        }
-                        else {
-                            if((board.getBlackKing() & bitboard[row][column]) != 0) {
-                                g.drawImage(this.redSquareImg, tileboard[row][column][0]+3, tileboard[row][column][1]+3, this);
-                                break;
-                            }
-                        }
-                    }  
-                }
-            }
             g.drawImage(this.greenSquareImg, tileboard[selectedPieceRow][selectedPieceColumn][0]+3, tileboard[selectedPieceRow][selectedPieceColumn][1]+3, this);
             
             // Drawing markers where the selected piece can move
@@ -141,143 +142,34 @@ public class BoardPanel extends JPanel {
         }
         
         // Drawing pieces
-        // White pawn
-        if (this.wPawnImg != null) {
-            long whitePawns = board.getWhitePawns();
+        for(int row = 0; row < boardSize; row++) {
+            for(int column = 0; column < boardSize; column++) {
+                if((board.getWhitePawns() & bitboard[row][column]) != 0)
+                    g.drawImage(this.wPawnImg, tileboard[row][column][0], tileboard[row][column][1], this);
+                if((board.getWhiteKnights() & bitboard[row][column]) != 0)
+                    g.drawImage(this.wKnightImg, tileboard[row][column][0], tileboard[row][column][1], this);
+                if((board.getWhiteBishops() & bitboard[row][column]) != 0)
+                    g.drawImage(this.wBishopImg, tileboard[row][column][0], tileboard[row][column][1], this);
+                if((board.getWhiteRooks() & bitboard[row][column]) != 0)
+                    g.drawImage(this.wRookImg, tileboard[row][column][0], tileboard[row][column][1], this);
+                if((board.getWhiteQueens() & bitboard[row][column]) != 0)
+                    g.drawImage(this.wQueenImg, tileboard[row][column][0], tileboard[row][column][1], this);
+                if((board.getWhiteKing() & bitboard[row][column]) != 0)
+                    g.drawImage(this.wKingImg, tileboard[row][column][0], tileboard[row][column][1], this);
 
-            for(int row = 0; row < boardSize; row++) {
-                for(int column = 0; column < boardSize; column++) {
-                    if((whitePawns & bitboard[row][column]) != 0)
-                        g.drawImage(this.wPawnImg, tileboard[row][column][0], tileboard[row][column][1], this);
-                }
-            }            
-        }
-
-        // White knight
-        if (this.wKnightImg != null) {
-            long whiteKnights = board.getWhiteKnights();
-
-            for(int row = 0; row < boardSize; row++) {
-                for(int column = 0; column < boardSize; column++) {
-                    if((whiteKnights & bitboard[row][column]) != 0)
-                        g.drawImage(this.wKnightImg, tileboard[row][column][0], tileboard[row][column][1], this);
-                }
-            }            
-        }
-
-        // White bishop
-        if (this.wBishopImg != null) {
-            long whiteBishops = board.getWhiteBishops();
-            for(int row = 0; row < boardSize; row++) {
-                for(int column = 0; column < boardSize; column++) {
-                    if((whiteBishops & bitboard[row][column]) != 0)
-                        g.drawImage(this.wBishopImg, tileboard[row][column][0], tileboard[row][column][1], this);
-                }
-            }            
-        }
-
-        // White rook
-        if (this.wRookImg != null) {
-            long whiteRooks = board.getWhiteRooks();
-            for(int row = 0; row < boardSize; row++) {
-                for(int column = 0; column < boardSize; column++) {
-                    if((whiteRooks & bitboard[row][column]) != 0)
-                        g.drawImage(this.wRookImg, tileboard[row][column][0], tileboard[row][column][1], this);
-                }
-            }            
-        }
-
-        // White queen
-        if (this.wQueenImg != null) {
-            long whiteQueens = board.getWhiteQueens();
-            for(int row = 0; row < boardSize; row++) {
-                for(int column = 0; column < boardSize; column++) {
-                    if((whiteQueens & bitboard[row][column]) != 0)
-                        g.drawImage(this.wQueenImg, tileboard[row][column][0], tileboard[row][column][1], this);
-                }
-            }            
-        }
-
-        // White king
-        if (this.wKingImg != null) {
-            long whiteKing = board.getWhiteKing();
-            for(int row = 0; row < boardSize; row++) {
-                for(int column = 0; column < boardSize; column++) {
-                    if((whiteKing & bitboard[row][column]) != 0) {
-
-                        g.drawImage(this.wKingImg, tileboard[row][column][0], tileboard[row][column][1], this);
-                        break;
-                    }
-                }
-            }            
-        }
-
-        // Black pawn
-        if (this.bPawnImg != null) {
-            long blackPawns = board.getBlackPawns();
-            for(int row = 0; row < boardSize; row++) {
-                for(int column = 0; column < boardSize; column++) {
-                    if((blackPawns & bitboard[row][column]) != 0)
-                        g.drawImage(this.bPawnImg, tileboard[row][column][0], tileboard[row][column][1], this);
-                }
-            }            
-        }
-
-        // Black knight
-        if (this.bKnightImg != null) {
-            long blackKnights = board.getBlackKnights();
-            for(int row = 0; row < boardSize; row++) {
-                for(int column = 0; column < boardSize; column++) {
-                    if((blackKnights & bitboard[row][column]) != 0)
-                        g.drawImage(this.bKnightImg, tileboard[row][column][0], tileboard[row][column][1], this);
-                }
-            }            
-        }
-
-        // Black bishop
-        if (this.bBishopImg != null) {
-            long blackBishops = board.getBlackBishops();
-            for(int row = 0; row < boardSize; row++) {
-                for(int column = 0; column < boardSize; column++) {
-                    if((blackBishops & bitboard[row][column]) != 0)
-                        g.drawImage(this.bBishopImg, tileboard[row][column][0], tileboard[row][column][1], this);
-                }
-            }            
-        }
-
-        // Black rook
-        if (this.bRookImg != null) {
-            long blackRooks = board.getBlackRooks();
-            for(int row = 0; row < boardSize; row++) {
-                for(int column = 0; column < boardSize; column++) {
-                    if((blackRooks & bitboard[row][column]) != 0)
-                        g.drawImage(this.bRookImg, tileboard[row][column][0], tileboard[row][column][1], this);
-                }
-            }            
-        }
-
-        // Black queen
-        if (this.bQueenImg != null) {
-            long blackQueens = board.getBlackQueens();
-            for(int row = 0; row < boardSize; row++) {
-                for(int column = 0; column < boardSize; column++) {
-                    if((blackQueens & bitboard[row][column]) != 0)
-                        g.drawImage(this.bQueenImg, tileboard[row][column][0], tileboard[row][column][1], this);
-                }
-            }            
-        }
-
-        // Black king
-        if (this.bKingImg != null) {
-            long blackKing = board.getBlackKing();
-            for(int row = 0; row < boardSize; row++) {
-                for(int column = 0; column < boardSize; column++) {
-                    if((blackKing & bitboard[row][column]) != 0) {
-                        g.drawImage(this.bKingImg, tileboard[row][column][0], tileboard[row][column][1], this);
-                        break;
-                    }  
-                }
-            }            
+                if((board.getBlackPawns() & bitboard[row][column]) != 0)
+                    g.drawImage(this.bPawnImg, tileboard[row][column][0], tileboard[row][column][1], this);
+                if((board.getBlackKnights() & bitboard[row][column]) != 0)
+                    g.drawImage(this.bKnightImg, tileboard[row][column][0], tileboard[row][column][1], this);
+                if((board.getBlackBishops() & bitboard[row][column]) != 0)
+                    g.drawImage(this.bBishopImg, tileboard[row][column][0], tileboard[row][column][1], this);
+                if((board.getBlackRooks() & bitboard[row][column]) != 0)
+                    g.drawImage(this.bRookImg, tileboard[row][column][0], tileboard[row][column][1], this);
+                if((board.getBlackQueens() & bitboard[row][column]) != 0)
+                    g.drawImage(this.bQueenImg, tileboard[row][column][0], tileboard[row][column][1], this);
+                if((board.getBlackKing() & bitboard[row][column]) != 0)
+                    g.drawImage(this.bKingImg, tileboard[row][column][0], tileboard[row][column][1], this);
+            }
         }
     }
 }
