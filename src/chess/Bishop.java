@@ -16,25 +16,79 @@ abstract public class Bishop {
         long blackPieces = board.getBlackPawns() | board.getBlackKnights() | board.getBlackBishops() |
         board.getBlackRooks() | board.getBlackQueens() | board.getBlackKing();
 
+        long blockedPieces;
+        long capturablePieces;
         if (color == 'w') {
-            long blockedPieces = whitePieces;
-            long capturablePieces = blackPieces;
+            blockedPieces = whitePieces;
+            capturablePieces = blackPieces;
         }
         else {
-            long blockedPieces = blackPieces;
-            long capturablePieces = whitePieces;
+            blockedPieces = blackPieces;
+            capturablePieces = whitePieces;
         }
 
         int boardSize = board.getBoardSize();
-        
-        for(int row = 0; row < boardSize; row++) {
-            for(int column = 0; column < boardSize; column++) {
-                if (Math.abs(row - bishopRow) == Math.abs(column - bishopColumn) && row != bishopRow && column != bishopColumn) {
-                    possibleMoves |= bitboard[row][column];
-                }
-            }
+
+        // Upper-Left Diagonal
+        int row = bishopRow;
+        int column = bishopColumn;
+        while(row > 0 && column > 0) {
+            row--; column--;
+
+            if((blockedPieces & bitboard[row][column]) != 0)
+                break;
+
+            possibleMoves |= bitboard[row][column];
+
+            if((capturablePieces & bitboard[row][column]) != 0)
+                break;
         }
-        
+
+        // Upper-Right Diagonal
+        row = bishopRow;
+        column = bishopColumn;
+        while(row > 0 && column < boardSize-1) {
+            row--; column++;
+
+            if((blockedPieces & bitboard[row][column]) != 0)
+                break;
+            
+            possibleMoves |= bitboard[row][column];
+            
+            if((capturablePieces & bitboard[row][column]) != 0)
+                break;
+        }
+
+        // Lower-Left Diagonal
+        row = bishopRow;
+        column = bishopColumn;
+        while(row < boardSize-1 && column > 0) {
+            row++; column--;
+
+            if((blockedPieces & bitboard[row][column]) != 0)
+                break;
+
+            possibleMoves |= bitboard[row][column];
+
+            if((capturablePieces & bitboard[row][column]) != 0)
+                break;
+        }
+
+        // Lower-Right Diagonal
+        row = bishopRow;
+        column = bishopColumn;
+        while(row < boardSize-1 && column < boardSize-1) {
+            row++; column++;
+
+            if((blockedPieces & bitboard[row][column]) != 0)
+                break;
+
+            possibleMoves |= bitboard[row][column];
+
+            if((capturablePieces & bitboard[row][column]) != 0)
+                break;
+        }
+
         return possibleMoves;
     }
 }

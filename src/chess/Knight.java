@@ -1,0 +1,53 @@
+package chess;
+
+abstract public class Knight {
+    // Base value of the knight according to the game evaluation system
+    public static final double BASE_VALUE = 3.0;
+
+    // Pre-defined masks to prevend wrap-around when detecting nearby tiles
+    static final long FILE_A = 0x0101010101010101L;
+    static final long FILE_B = 0x0202020202020202L;
+    static final long FILE_G = 0x4040404040404040L;
+    static final long FILE_H = 0x8080808080808080L;
+
+    static final long NOT_A = ~FILE_A;
+    static final long NOT_AB = ~(FILE_A | FILE_B);
+    static final long NOT_H = ~FILE_H;
+    static final long NOT_GH = ~(FILE_G | FILE_H);
+
+    public static long calculatePossibleMoves(Board board, int knightRow, int knightColumn, char color) {
+        long[][] bitboard = board.getBitboard();
+        long possibleMoves = 0L;
+
+        // Defines tiles with pieces of the same color
+        long whitePieces = board.getWhitePawns() | board.getWhiteKnights() | board.getWhiteBishops() |
+        board.getWhiteRooks() | board.getWhiteQueens() | board.getWhiteKing();
+            
+        // Defines tiles with enemy pieces
+        long blackPieces = board.getBlackPawns() | board.getBlackKnights() | board.getBlackBishops() |
+        board.getBlackRooks() | board.getBlackQueens() | board.getBlackKing();
+
+        long blockedPieces;
+        if (color == 'w')
+            blockedPieces = whitePieces;
+        else
+            blockedPieces = blackPieces;
+
+        // Testing each target tile individually
+        long knightPosition = bitboard[knightRow][knightColumn];
+
+        possibleMoves |= (knightPosition << 17) & NOT_A; // Up Up Left
+        possibleMoves |= (knightPosition << 15) & NOT_H; // Up Up Right
+
+        possibleMoves |= (knightPosition << 10) & NOT_AB; // Up Left Left
+        possibleMoves |= (knightPosition << 6) & NOT_GH; // Up Right Right
+
+        possibleMoves |= (knightPosition >>> 17) & NOT_H; // Down Down Right
+        possibleMoves |= (knightPosition >>> 15) & NOT_A; // Down Down Left
+
+        possibleMoves |= (knightPosition >>> 10) & NOT_GH; // Down Right Right
+        possibleMoves |= (knightPosition >>> 6) & NOT_AB; // Down Left Left
+
+        return possibleMoves & ~blockedPieces;
+    }
+}

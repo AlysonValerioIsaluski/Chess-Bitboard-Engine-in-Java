@@ -70,8 +70,9 @@ public class BoardPanel extends JPanel {
         board.getWhiteRooks() | board.getWhiteQueens() | board.getWhiteKing() |
         board.getBlackPawns() | board.getBlackKnights() | board.getBlackBishops() |
         board.getBlackRooks() | board.getBlackQueens() | board.getBlackKing();
-
-        long possibleMoves = MoveGenerator.calculatePossibleMoves('b', this.board, 4, 4, 'w');       
+        
+        // Testing white pawn moves in the e4 square
+        long possibleMoves = MoveGenerator.calculatePossibleMoves('p', this.board, 6, 4, 'w');
         for(int row = 0; row < boardSize; row++) {
             for(int column = 0; column < boardSize; column++) {
                 if((possibleMoves & bitboard[row][column]) != 0) {

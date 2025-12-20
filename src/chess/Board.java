@@ -56,12 +56,12 @@ public class Board {
         this.blackRooks = this.bitboard[0][0] | this.bitboard[0][7];
 
         // Setting queens
-        this.whiteQueens = this.bitboard[7][4];
-        this.blackQueens = this.bitboard[0][4];
+        this.whiteQueens = this.bitboard[7][3];
+        this.blackQueens = this.bitboard[0][3];
 
         // Setting kings
-        this.whiteKing = this.bitboard[7][3];
-        this.blackKing = this.bitboard[0][3];
+        this.whiteKing = this.bitboard[7][4];
+        this.blackKing = this.bitboard[0][4];
         
         // Additional rules
         isWhiteTurn = true;   
