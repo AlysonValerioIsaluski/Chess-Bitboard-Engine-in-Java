@@ -9,7 +9,6 @@ abstract public class Pawn {
         long possibleMoves = 0L;
 
         long whitePieces = board.getWhitePieces();
-            
         long blackPieces = board.getBlackPieces();
 
         long blockedPieces;
@@ -33,8 +32,12 @@ abstract public class Pawn {
                 possibleMoves |= bitboard[pawnRow-1][pawnColumn];
 
             // Checks if pawn is still in starting tile, then it can move two tiles forward
-            if(pawnRow >= boardSize-2)
+            if(pawnRow >= boardSize-2) {
+                // Checks if there is a piece 2 tiles in front
+                if((blockedPieces & bitboard[pawnRow-2][pawnColumn]) != 0 || (capturablePieces & bitboard[pawnRow-2][pawnColumn]) != 0)
+                    return possibleMoves;
                 possibleMoves |= bitboard[pawnRow-2][pawnColumn];
+            }
         }
         else {
             blockedPieces = blackPieces;
@@ -53,8 +56,12 @@ abstract public class Pawn {
                 possibleMoves |= bitboard[pawnRow+1][pawnColumn];
             
             // Checks if pawn is still in starting tile, then it can move two tiles forward
-            if(pawnRow <= 1)
+            if(pawnRow <= 1) {
+                // Checks if there is a piece in front
+                if((blockedPieces & bitboard[pawnRow+2][pawnColumn]) != 0 || (capturablePieces & bitboard[pawnRow+2][pawnColumn]) != 0)
+                    return possibleMoves;
                 possibleMoves |= bitboard[pawnRow+2][pawnColumn];
+            }
         }
         
         return possibleMoves;

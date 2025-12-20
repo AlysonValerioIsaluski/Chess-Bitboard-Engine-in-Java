@@ -21,11 +21,15 @@ public class GameLogic {
             selectSquare(row-1, column-1);
             System.out.println("Tile selected: (" + (row-1) + ", " + (column-1) + ")");
         }
-        else
-            selectedPiece = '0';
+        else {
+            this.selectedPiece = '0';
+            this.selectedPiecePossibleMoves = 0L;
+        }
     }
 
     private void selectSquare(int row, int column) {
+        long selectMask = bitboard[row][column];
+
         long whitePieces = board.getWhitePieces();
         long blackPieces = board.getBlackPieces();
         long playerPieces;
@@ -34,82 +38,100 @@ public class GameLogic {
             playerPieces = whitePieces;
             this.enemyPieces = blackPieces;
 
-            if((playerPieces & bitboard[row][column]) != 0) {
-                if(((playerPieces & board.getWhitePawns()) & bitboard[row][column]) != 0)
+            // If player has selected a tile with one of their pieces
+            if((playerPieces & selectMask) != 0) {
+                if(((playerPieces & board.getWhitePawns()) & selectMask) != 0)
                     this.selectedPiece = 'p';
-                else if(((playerPieces & board.getWhiteKnights()) & bitboard[row][column]) != 0)
+                else if(((playerPieces & board.getWhiteKnights()) & selectMask) != 0)
                     this.selectedPiece = 'n';
-                else if(((playerPieces & board.getWhiteBishops()) & bitboard[row][column]) != 0)
+                else if(((playerPieces & board.getWhiteBishops()) & selectMask) != 0)
                     this.selectedPiece = 'b';
-                else if(((playerPieces & board.getWhiteRooks()) & bitboard[row][column]) != 0)
+                else if(((playerPieces & board.getWhiteRooks()) & selectMask) != 0)
                     this.selectedPiece = 'r';
-                else if(((playerPieces & board.getWhiteQueens()) & bitboard[row][column]) != 0)
+                else if(((playerPieces & board.getWhiteQueens()) & selectMask) != 0)
                     this.selectedPiece = 'q';
-                else if(((playerPieces & board.getWhiteKing()) & bitboard[row][column]) != 0)
+                else if(((playerPieces & board.getWhiteKing()) & selectMask) != 0)
                     this.selectedPiece = 'k';
                 
                 this.selectedPiecePossibleMoves = MoveGenerator.calculatePossibleMoves(this.selectedPiece, this.board, row, column, 'w');
             }
-            else if((this.selectedPiecePossibleMoves & bitboard[row][column]) != 0) {
-                // Capture logic for White's turn
-                if((bitboard[row][column] & enemyPieces) != 0) {
+
+            // If player has selected a tile which is a possible move for the selected piece 
+            else if((this.selectedPiecePossibleMoves & selectMask) != 0) {
+                // If player has selected a tile with a piece capturable by the selected piece
+                if((selectMask & enemyPieces) != 0) {
                     char capturedPieceType = '0', capturedColor = 'b';
 
-                    if((board.getBlackPawns() & bitboard[row][column]) != 0) capturedPieceType = 'p';
-                    else if((board.getBlackKnights() & bitboard[row][column]) != 0) capturedPieceType = 'n';
-                    else if((board.getBlackBishops() & bitboard[row][column]) != 0) capturedPieceType = 'b';
-                    else if((board.getBlackRooks() & bitboard[row][column]) != 0) capturedPieceType = 'r';
-                    else if((board.getBlackQueens() & bitboard[row][column]) != 0) capturedPieceType = 'q';
-                    else if((board.getBlackKing() & bitboard[row][column]) != 0) capturedPieceType = 'k';
+                    if((board.getBlackPawns() & selectMask) != 0) capturedPieceType = 'p';
+                    else if((board.getBlackKnights() & selectMask) != 0) capturedPieceType = 'n';
+                    else if((board.getBlackBishops() & selectMask) != 0) capturedPieceType = 'b';
+                    else if((board.getBlackRooks() & selectMask) != 0) capturedPieceType = 'r';
+                    else if((board.getBlackQueens() & selectMask) != 0) capturedPieceType = 'q';
+                    else if((board.getBlackKing() & selectMask) != 0) capturedPieceType = 'k';
 
                     if(capturedPieceType != '0')
-                        removePiece(capturedPieceType, row, column, capturedColor);
+                        removePiece(capturedPieceType, selectMask, capturedColor);
                 }
 
                 // Moves selected piece to target tile that is a possible move for that selected piece
                 movePiece(this.selectedPiece, selectedPieceRow, selectedPieceColumn, row, column, 'w');
                 board.setWhiteTurn(false);
             }
+
+            // If player has selected anything else, the selection will just clear
+            else {
+                this.selectedPiece = '0';
+                this.selectedPiecePossibleMoves = 0L;
+            }
         }
         else {
             playerPieces = blackPieces;
             this.enemyPieces = whitePieces;
 
-            if((playerPieces & bitboard[row][column]) != 0) {
-                if(((playerPieces & board.getBlackPawns()) & bitboard[row][column]) != 0)
+            // If player has selected a tile with one of their pieces
+            if((playerPieces & selectMask) != 0) {
+                if(((playerPieces & board.getBlackPawns()) & selectMask) != 0)
                     this.selectedPiece = 'p';
-                else if(((playerPieces & board.getBlackKnights()) & bitboard[row][column]) != 0)
+                else if(((playerPieces & board.getBlackKnights()) & selectMask) != 0)
                     this.selectedPiece = 'n';
-                else if(((playerPieces & board.getBlackBishops()) & bitboard[row][column]) != 0)
+                else if(((playerPieces & board.getBlackBishops()) & selectMask) != 0)
                     this.selectedPiece = 'b';
-                else if(((playerPieces & board.getBlackRooks()) & bitboard[row][column]) != 0)
+                else if(((playerPieces & board.getBlackRooks()) & selectMask) != 0)
                     this.selectedPiece = 'r';
-                else if(((playerPieces & board.getBlackQueens()) & bitboard[row][column]) != 0)
+                else if(((playerPieces & board.getBlackQueens()) & selectMask) != 0)
                     this.selectedPiece = 'q';
-                else if(((playerPieces & board.getBlackKing()) & bitboard[row][column]) != 0)
+                else if(((playerPieces & board.getBlackKing()) & selectMask) != 0)
                     this.selectedPiece = 'k';
                 
                 this.selectedPiecePossibleMoves = MoveGenerator.calculatePossibleMoves(this.selectedPiece, this.board, row, column, 'b');
             }
-            else if((this.selectedPiecePossibleMoves & bitboard[row][column]) != 0) {
-                // Capture logic for Black's turn
-                if((bitboard[row][column] & enemyPieces) != 0) {
+
+            // If player has selected a tile which is a possible move for the selected piece 
+            else if((this.selectedPiecePossibleMoves & selectMask) != 0) {
+                // If player has selected a tile with a piece capturable by the selected piece
+                if((selectMask & enemyPieces) != 0) {
                     char capturedPieceType = '0', capturedColor = 'w';
 
-                    if((board.getWhitePawns() & bitboard[row][column]) != 0) capturedPieceType = 'p';
-                    else if((board.getWhiteKnights() & bitboard[row][column]) != 0) capturedPieceType = 'n';
-                    else if((board.getWhiteBishops() & bitboard[row][column]) != 0) capturedPieceType = 'b';
-                    else if((board.getWhiteRooks() & bitboard[row][column]) != 0) capturedPieceType = 'r';
-                    else if((board.getWhiteQueens() & bitboard[row][column]) != 0) capturedPieceType = 'q';
-                    else if((board.getWhiteKing() & bitboard[row][column]) != 0) capturedPieceType = 'k';
+                    if((board.getWhitePawns() & selectMask) != 0) capturedPieceType = 'p';
+                    else if((board.getWhiteKnights() & selectMask) != 0) capturedPieceType = 'n';
+                    else if((board.getWhiteBishops() & selectMask) != 0) capturedPieceType = 'b';
+                    else if((board.getWhiteRooks() & selectMask) != 0) capturedPieceType = 'r';
+                    else if((board.getWhiteQueens() & selectMask) != 0) capturedPieceType = 'q';
+                    else if((board.getWhiteKing() & selectMask) != 0) capturedPieceType = 'k';
 
                     if(capturedPieceType != '0')
-                        removePiece(capturedPieceType, row, column, capturedColor);
+                        removePiece(capturedPieceType, selectMask, capturedColor);
                 }
-                
+
                 // Moves selected piece to target tile that is a possible move for that selected piece
                 movePiece(this.selectedPiece, selectedPieceRow, selectedPieceColumn, row, column, 'b');
                 board.setWhiteTurn(true);
+            }
+
+            // If player has selected anything else, the selection will just clear
+            else {
+                this.selectedPiece = '0';
+                this.selectedPiecePossibleMoves = 0L;
             }
         }
 
@@ -146,10 +168,7 @@ public class GameLogic {
     this.selectedPiece = '0';
     }
 
-    public void removePiece(char pieceType, int row, int column, char color) {
-        // Mask that has target tile
-        long removeMask = bitboard[row][column];
-
+    public void removePiece(char pieceType, long removeMask, char color) {
         if (color == 'w') {
             switch (pieceType) {
                 case 'p' -> board.setWhitePawns(board.getWhitePawns() ^ removeMask);
