@@ -21,6 +21,7 @@ public class BoardPanel extends JPanel {
 
     private boolean inCheck;
     private boolean inCheckmate;
+    private boolean inStalemate;
 
     private final BufferedImage boardImg;
     private final Image wPawnImg, wKnightImg, wBishopImg, wRookImg, wQueenImg, wKingImg;
@@ -44,6 +45,7 @@ public class BoardPanel extends JPanel {
         this.selectedPiece = '0';
         this.inCheck = false;
         this.inCheckmate = false;
+        this.inStalemate = false;
         
         this.boardImg = boardImg;
 
@@ -92,6 +94,7 @@ public class BoardPanel extends JPanel {
                 selectedPieceColumn = gameLogic.getSelectedPieceColumn();
                 inCheck = gameLogic.getCheckStatus();
                 inCheckmate = gameLogic.getCheckmateStatus();
+                inStalemate = gameLogic.getStalemateStatus();
 
                 repaint();
             }
@@ -108,16 +111,23 @@ public class BoardPanel extends JPanel {
             g.drawImage(this.boardImg, 0, 0, this);
         }
 
+        // Erasing pieces if there's an stalemate
+        if(this.inStalemate) {
+            System.out.println("STALEMATE!");
+            return;
+        }
+        
         // Drawing check marker if king is in check
         if(this.inCheck) {
             int[] kingCoordinates = GameLogic.getKingCoordinates(board, board.getTurn());
-
+            
             g.drawImage(this.redSquareImg, tileboard[kingCoordinates[0]][kingCoordinates[1]][0]+3, tileboard[kingCoordinates[0]][kingCoordinates[1]][1]+3, this);
-
+            
+            
             // Drawing markers under all checkmated players pieces if king is in checkmate
             if(this.inCheckmate) {
-                System.out.println("CHECKMATE!!!");
-
+                System.out.println("CHECKMATE!");
+                
                 if(board.getTurn() == 'w') {
                     for(int row = 0; row < boardSize; row++) {
                         for(int column = 0; column < boardSize; column++) {
@@ -162,9 +172,9 @@ public class BoardPanel extends JPanel {
                 for(int column = 0; column < boardSize; column++) {
                     if((this.selectedPiecePossibleMoves & bitboard[row][column]) != 0) {
                         if((this.enemyPieces & bitboard[row][column]) != 0) // capturable
-                            g.drawImage(this.orangeCircleImg, tileboard[row][column][0], tileboard[row][column][1], this);
+                        g.drawImage(this.orangeCircleImg, tileboard[row][column][0], tileboard[row][column][1], this);
                         else // not capturable
-                            g.drawImage(this.greenCircleImg, tileboard[row][column][0], tileboard[row][column][1], this);
+                        g.drawImage(this.greenCircleImg, tileboard[row][column][0], tileboard[row][column][1], this);
                     }
                 }
             }
@@ -185,7 +195,7 @@ public class BoardPanel extends JPanel {
                     g.drawImage(this.wQueenImg, tileboard[row][column][0], tileboard[row][column][1], this);
                 if((board.getWhiteKing() & bitboard[row][column]) != 0)
                     g.drawImage(this.wKingImg, tileboard[row][column][0], tileboard[row][column][1], this);
-
+                
                 if((board.getBlackPawns() & bitboard[row][column]) != 0)
                     g.drawImage(this.bPawnImg, tileboard[row][column][0], tileboard[row][column][1], this);
                 if((board.getBlackKnights() & bitboard[row][column]) != 0)
@@ -200,6 +210,7 @@ public class BoardPanel extends JPanel {
                     g.drawImage(this.bKingImg, tileboard[row][column][0], tileboard[row][column][1], this);
             }
         }
+
     }
 }
 

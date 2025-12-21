@@ -58,7 +58,9 @@ abstract public class King {
         if(!GameLogic.isMoveIllegal(board, color, 'k', kingRow, kingColumn, kingRow+1, kingColumn-1))
             possibleMoves |= (kingPosition << 7) & NOT_H;
 
-        return possibleMoves & ~blockedPieces;
+        possibleMoves &= ~blockedPieces;
+        System.out.println("POSIIBLE KING MOVES (" + kingRow + ", " + kingColumn + "): " + possibleMoves);
+        return possibleMoves;
     }
 
     public static long calculatePossibleCaptures(Board board, int kingRow, int kingColumn, char color) {

@@ -11,7 +11,7 @@ public class GameLogic {
 
     private boolean inCheck;
     private boolean inCheckmate;
-    //private boolean inStalemate;
+    private boolean inStalemate;
 
     public GameLogic(Board board) {
         this.board = board;
@@ -21,14 +21,14 @@ public class GameLogic {
         this.selectedPiece = '0';
         this.inCheck = false;
         this.inCheckmate = false;
-        //this.inStalemate = false;
+        this.inStalemate = false;
     }
 
     public void handleTileSelection(int row, int column) {
         // Check if tile clicked is bounded inside the board
         if (row > 0 && row <= boardSize && column > 0 && column <= boardSize) {
             selectTile(row-1, column-1);
-            System.out.println("Tile selected: (" + (row-1) + ", " + (column-1) + ")");
+            // System.out.println("Tile selected: (" + (row-1) + ", " + (column-1) + ")");
         }
         else {
             this.selectedPiece = '0';
@@ -69,7 +69,7 @@ public class GameLogic {
             else if ((this.selectedPiecePossibleMoves & selectMask) != 0) {
                 // If player has selected a tile with a piece capturable by the selected piece
                 if ((selectMask & enemyPieces) != 0) {
-                    char capturedPieceType = GameLogic.getPieceTypeFromTile(this.board, row, column);
+                    char capturedPieceType = getPieceTypeFromTile(this.board, row, column);
 
                     if (capturedPieceType != '0')
                         removePiece(this.board, capturedPieceType, selectMask, 'b');
@@ -81,6 +81,7 @@ public class GameLogic {
 
                 this.inCheck = isInCheck(this.board, 'b');
                 this.inCheckmate = isInCheckmate(this.board, 'b');
+                this.inStalemate = isInStalemate(this.board, 'b');
             }
 
             // If player has selected anything else, the selection will just clear
@@ -127,6 +128,7 @@ public class GameLogic {
 
                 this.inCheck = isInCheck(this.board, 'w');
                 this.inCheckmate = isInCheckmate(this.board, 'w');
+                this.inStalemate = isInStalemate(this.board, 'w');
             }
 
             // If player has selected anything else, the selection will just clear
@@ -305,14 +307,14 @@ public class GameLogic {
         }
 
         boolean isIllegal = isInCheck(ghostBoard, color);
-        if(isIllegal)
-            System.out.println("! " + color + "-" + pieceType + ": " + (GameLogic.getTileName(rowFrom, columnFrom)) + " to " + (GameLogic.getTileName(rowTo, columnTo)) + " is ILLEGAL.");
+        // if(isIllegal)
+            // System.out.println("! " + color + "-" + pieceType + ": " + (GameLogic.getTileName(rowFrom, columnFrom)) + " to " + (GameLogic.getTileName(rowTo, columnTo)) + " is ILLEGAL.");
         return isIllegal;
     }
     
     // If king can be attack by any enemy piece, the player's king is in check
     public static boolean isInCheck(Board board, char color) {
-        if(color == 'w')
+        if (color == 'w')
             return ((board.getWhiteKing() & GameLogic.getAttackingTiles(board, 'b')) != 0);
         else
             return ((board.getBlackKing() & GameLogic.getAttackingTiles(board, 'w')) != 0);
@@ -320,8 +322,8 @@ public class GameLogic {
 
     // Check if king of that color is in checkmate
     private static boolean isInCheckmate(Board board, char color) {
-        // If the king not in check, it definitely is not in checkmate
-        if(!isInCheck(board, color))
+        // If the king is not in check, it definitely is not in checkmate
+        if (!isInCheck(board, color))
             return false;
 
         // Checks if the checked king has any legal moves, if it doens't, its checkmate
@@ -332,6 +334,67 @@ public class GameLogic {
         return kingMoves == 0L;
     }
 
+    // Check if king of that color is in stalemate
+    private static boolean isInStalemate(Board board, char color) {
+        // If the king is in check, it definitely is not in stalemate
+        if (isInCheck(board, color))
+            return false;
+
+        // Checks if the player has any legal moves, if it doens't, its stalemate
+        return !playerHasMoves(board, color);
+    }
+
+    private static boolean playerHasMoves(Board board, char color) {
+        int row, column, boardSize = board.getBoardSize();
+        long[][] bitboard = board.getBitboard();
+        long movementTiles = 0L;
+        
+        if (color == 'w') {
+            for (row = 0; row < boardSize; row++) {
+                for (column = 0; column < boardSize; column++) {
+                    if ((board.getWhitePawns() & bitboard[row][column]) != 0)
+                        movementTiles = MoveGenerator.calculatePossibleMoves('p', board, row, column, color);
+                    else if ((board.getWhiteKnights() & bitboard[row][column]) != 0)
+                        movementTiles = MoveGenerator.calculatePossibleMoves('n', board, row, column, color);
+                    else if ((board.getWhiteBishops() & bitboard[row][column]) != 0)
+                        movementTiles = MoveGenerator.calculatePossibleMoves('b', board, row, column, color);
+                    else if ((board.getWhiteRooks() & bitboard[row][column]) != 0)
+                        movementTiles = MoveGenerator.calculatePossibleMoves('r', board, row, column, color);
+                    else if ((board.getWhiteQueens() & bitboard[row][column]) != 0)
+                        movementTiles = MoveGenerator.calculatePossibleMoves('q', board, row, column, color);
+                    else if ((board.getWhiteKing() & bitboard[row][column]) != 0)
+                        movementTiles = MoveGenerator.calculatePossibleMoves('k', board, row, column, color);
+
+                    if (movementTiles != 0L)
+                        return true;
+                }
+            }
+        }
+        else {
+            for (row = 0; row < boardSize; row++) {
+                for (column = 0; column < boardSize; column++) {
+                    if ((board.getBlackPawns() & bitboard[row][column]) != 0)
+                        movementTiles = MoveGenerator.calculatePossibleMoves('p', board, row, column, color);
+                    else if ((board.getBlackKnights() & bitboard[row][column]) != 0)
+                        movementTiles = MoveGenerator.calculatePossibleMoves('n', board, row, column, color);
+                    else if ((board.getBlackBishops() & bitboard[row][column]) != 0)
+                        movementTiles = MoveGenerator.calculatePossibleMoves('b', board, row, column, color);
+                    else if ((board.getBlackRooks() & bitboard[row][column]) != 0)
+                        movementTiles = MoveGenerator.calculatePossibleMoves('r', board, row, column, color);
+                    else if ((board.getBlackQueens() & bitboard[row][column]) != 0)
+                        movementTiles = MoveGenerator.calculatePossibleMoves('q', board, row, column, color);
+                    else if ((board.getBlackKing() & bitboard[row][column]) != 0)
+                        movementTiles = MoveGenerator.calculatePossibleMoves('k', board, row, column, color);
+
+                    if (movementTiles != 0L)
+                        return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     // Gets kings row and column of that color
     public static int[] getKingCoordinates(Board board, char color) {
         int boardSize = board.getBoardSize();
@@ -339,14 +402,14 @@ public class GameLogic {
         
         long king;
 
-        if(color == 'w')
+        if (color == 'w')
             king = board.getWhiteKing();
         else
             king = board.getBlackKing();
 
-        for(int row = 0; row < boardSize; row++) {
-            for(int column = 0; column < boardSize; column++) {
-                if((king & bitboard[row][column]) != 0)
+        for (int row = 0; row < boardSize; row++) {
+            for (int column = 0; column < boardSize; column++) {
+                if ((king & bitboard[row][column]) != 0)
                     return new int[] {row, column};
             }
         }
@@ -387,5 +450,9 @@ public class GameLogic {
 
     public boolean getCheckmateStatus() {
         return inCheckmate;
+    }
+
+    public boolean getStalemateStatus() {
+        return inStalemate;
     }
 }
