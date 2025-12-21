@@ -80,8 +80,7 @@ public class GameLogic {
                 board.setTurn('b');
 
                 this.inCheck = isInCheck(this.board, 'b');
-                //if(this.inCheck)
-                //    handleCheckmate('b');
+                this.inCheckmate = isInCheckmate(this.board, 'b');
             }
 
             // If player has selected anything else, the selection will just clear
@@ -127,8 +126,7 @@ public class GameLogic {
                 board.setTurn('w');
 
                 this.inCheck = isInCheck(this.board, 'w');
-                //if (this.inCheck)
-                //    handleCheckmate('w');
+                this.inCheckmate = isInCheckmate(this.board, 'w');
             }
 
             // If player has selected anything else, the selection will just clear
@@ -281,7 +279,7 @@ public class GameLogic {
             enemyColor = 'b';
         else
             enemyColor = 'w';
-        
+
         char capturedPieceType = getPieceTypeFromTile(board, rowTo, columnTo);
         removePiece(ghostBoard, capturedPieceType, bitboard[rowTo][columnTo], enemyColor);
 
@@ -321,11 +319,24 @@ public class GameLogic {
     }
 
     // Check if king of that color is in checkmate
-    //private void handleCheckmate(char color) {
-    //}
+    private static boolean isInCheckmate(Board board, char color) {
+        // If the king not in check, it definitely is not in checkmate
+        if(!isInCheck(board, color))
+            return false;
+
+        // Checks if the checked king has any legal moves, if it doens't, its checkmate
+        long kingMoves;
+        int[] kingCoordinates = getKingCoordinates(board, color);
+        kingMoves = MoveGenerator.calculatePossibleMoves('k', board, kingCoordinates[0], kingCoordinates[1], color);
+
+        return kingMoves == 0L;
+    }
 
     // Gets kings row and column of that color
-    public int[] getKingCoordinates(char color) {
+    public static int[] getKingCoordinates(Board board, char color) {
+        int boardSize = board.getBoardSize();
+        long[][] bitboard = board.getBitboard();
+        
         long king;
 
         if(color == 'w')

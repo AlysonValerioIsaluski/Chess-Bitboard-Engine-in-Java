@@ -9,7 +9,6 @@ public class BoardPanel extends JPanel {
     private final Board board;
     private final int boardSize;
     private final long[][] bitboard;
-    private final GameLogic gameLogic;
 
     // Saves coordinates in pixels of the tiles in the board
     private final int[][][] tileboard;
@@ -39,7 +38,6 @@ public class BoardPanel extends JPanel {
         this.board = board;
         this.boardSize = board.getBoardSize();
         this.bitboard = board.getBitboard();
-        this.gameLogic = gameLogic;
 
         tileboard = new int[boardSize][boardSize][2];
 
@@ -110,16 +108,49 @@ public class BoardPanel extends JPanel {
             g.drawImage(this.boardImg, 0, 0, this);
         }
 
-        if(this.inCheckmate) {
-            System.out.println("CHECKMATE!!!");
-            return;
-        }
-
-        // Drawing check marked if king is in check
-        if(this.selectedPiece != 'k' && this.inCheck) {
-            int[] kingCoordinates = gameLogic.getKingCoordinates(board.getTurn());
+        // Drawing check marker if king is in check
+        if(this.inCheck) {
+            int[] kingCoordinates = GameLogic.getKingCoordinates(board, board.getTurn());
 
             g.drawImage(this.redSquareImg, tileboard[kingCoordinates[0]][kingCoordinates[1]][0]+3, tileboard[kingCoordinates[0]][kingCoordinates[1]][1]+3, this);
+
+            // Drawing markers under all checkmated players pieces if king is in checkmate
+            if(this.inCheckmate) {
+                System.out.println("CHECKMATE!!!");
+
+                if(board.getTurn() == 'w') {
+                    for(int row = 0; row < boardSize; row++) {
+                        for(int column = 0; column < boardSize; column++) {
+                            if((board.getWhitePawns() & bitboard[row][column]) != 0)
+                                g.drawImage(this.redSquareImg, tileboard[row][column][0]+3, tileboard[row][column][1]+3, this);
+                            else if((board.getWhiteKnights() & bitboard[row][column]) != 0)
+                                g.drawImage(this.redSquareImg, tileboard[row][column][0]+3, tileboard[row][column][1]+3, this);
+                            else if((board.getWhiteBishops() & bitboard[row][column]) != 0)
+                                g.drawImage(this.redSquareImg, tileboard[row][column][0]+3, tileboard[row][column][1]+3, this);
+                            else if((board.getWhiteRooks() & bitboard[row][column]) != 0)
+                                g.drawImage(this.redSquareImg, tileboard[row][column][0]+3, tileboard[row][column][1]+3, this);
+                            else if((board.getWhiteQueens() & bitboard[row][column]) != 0)
+                                g.drawImage(this.redSquareImg, tileboard[row][column][0]+3, tileboard[row][column][1]+3, this);
+                        }
+                    }
+                }
+                else {
+                    for(int row = 0; row < boardSize; row++) {
+                        for(int column = 0; column < boardSize; column++) {
+                            if((board.getBlackPawns() & bitboard[row][column]) != 0)
+                                g.drawImage(this.redSquareImg, tileboard[row][column][0]+3, tileboard[row][column][1]+3, this);
+                            else if((board.getBlackKnights() & bitboard[row][column]) != 0)
+                                g.drawImage(this.redSquareImg, tileboard[row][column][0]+3, tileboard[row][column][1]+3, this);
+                            else if((board.getBlackBishops() & bitboard[row][column]) != 0)
+                                g.drawImage(this.redSquareImg, tileboard[row][column][0]+3, tileboard[row][column][1]+3, this);
+                            else if((board.getBlackRooks() & bitboard[row][column]) != 0)
+                                g.drawImage(this.redSquareImg, tileboard[row][column][0]+3, tileboard[row][column][1]+3, this);
+                            else if((board.getBlackQueens() & bitboard[row][column]) != 0)
+                                g.drawImage(this.redSquareImg, tileboard[row][column][0]+3, tileboard[row][column][1]+3, this);
+                        }
+                    }
+                }
+            }
         }
 
         // Drawing selected piece marker
