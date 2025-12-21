@@ -18,18 +18,31 @@ abstract public class Pawn {
         if (color == 'w') {
             blockedPieces = whitePieces;
             capturablePieces = blackPieces;
+
+            // Checks if there are capturable pieces on the diagonal
+            if((pawnColumn != 0 && (capturablePieces & bitboard[pawnRow-1][pawnColumn-1]) != 0) &&
+            (!GameLogic.isMoveIllegal(board, color, 'p', pawnRow, pawnColumn, pawnRow-1, pawnColumn-1)))
+                possibleMoves |= bitboard[pawnRow-1][pawnColumn-1];
+
+            if((pawnColumn != boardSize-1 && (capturablePieces & bitboard[pawnRow-1][pawnColumn+1]) != 0) &&
+            (!GameLogic.isMoveIllegal(board, color, 'p', pawnRow, pawnColumn, pawnRow-1, pawnColumn+1)))
+                possibleMoves |= bitboard[pawnRow-1][pawnColumn+1];
             
+
             // Checks if there is a piece in front
             if((blockedPieces & bitboard[pawnRow-1][pawnColumn]) != 0 || (capturablePieces & bitboard[pawnRow-1][pawnColumn]) != 0)
                 return possibleMoves;
-            else
+            else if(!GameLogic.isMoveIllegal(board, color, 'p', pawnRow, pawnColumn, pawnRow-1, pawnColumn))
                 possibleMoves |= bitboard[pawnRow-1][pawnColumn];
+
 
             // Checks if pawn is still in starting tile, then it can move two tiles forward
             if(pawnRow >= boardSize-2) {
                 // Checks if there is a piece 2 tiles in front
-                if((blockedPieces & bitboard[pawnRow-2][pawnColumn]) != 0 || (capturablePieces & bitboard[pawnRow-2][pawnColumn]) != 0)
+                if(((blockedPieces & bitboard[pawnRow-2][pawnColumn]) != 0 || (capturablePieces & bitboard[pawnRow-2][pawnColumn]) != 0) ||
+                (GameLogic.isMoveIllegal(board, color, 'p', pawnRow, pawnColumn, pawnRow-2, pawnColumn)))
                     return possibleMoves;
+                
                 possibleMoves |= bitboard[pawnRow-2][pawnColumn];
             }
         }
@@ -37,17 +50,30 @@ abstract public class Pawn {
             blockedPieces = blackPieces;
             capturablePieces = whitePieces;
 
+            // Checks if there are capturable pieces on the diagonal
+            if((pawnColumn != 0 && (capturablePieces & bitboard[pawnRow+1][pawnColumn-1]) != 0) &&
+            (!GameLogic.isMoveIllegal(board, color, 'p', pawnRow, pawnColumn, pawnRow+1, pawnColumn-1)))
+                possibleMoves |= bitboard[pawnRow+1][pawnColumn-1];
+
+            if((pawnColumn != boardSize-1 && (capturablePieces & bitboard[pawnRow+1][pawnColumn+1]) != 0) &&
+            (!GameLogic.isMoveIllegal(board, color, 'p', pawnRow, pawnColumn, pawnRow+1, pawnColumn+1)))
+                possibleMoves |= bitboard[pawnRow+1][pawnColumn+1];
+
+
             // Checks if there is a piece in front
             if((blockedPieces & bitboard[pawnRow+1][pawnColumn]) != 0 || (capturablePieces & bitboard[pawnRow+1][pawnColumn]) != 0)
                 return possibleMoves;
-            else
+            else if(!GameLogic.isMoveIllegal(board, color, 'p', pawnRow, pawnColumn, pawnRow+1, pawnColumn))
                 possibleMoves |= bitboard[pawnRow+1][pawnColumn];
             
+
             // Checks if pawn is still in starting tile, then it can move two tiles forward
             if(pawnRow <= 1) {
                 // Checks if there is a piece in front
-                if((blockedPieces & bitboard[pawnRow+2][pawnColumn]) != 0 || (capturablePieces & bitboard[pawnRow+2][pawnColumn]) != 0)
+                if(((blockedPieces & bitboard[pawnRow+2][pawnColumn]) != 0 || (capturablePieces & bitboard[pawnRow+2][pawnColumn]) != 0) ||
+                (GameLogic.isMoveIllegal(board, color, 'p', pawnRow, pawnColumn, pawnRow+2, pawnColumn)))
                     return possibleMoves;
+
                 possibleMoves |= bitboard[pawnRow+2][pawnColumn];
             }
         }

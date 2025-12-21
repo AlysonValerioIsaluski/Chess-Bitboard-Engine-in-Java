@@ -9,6 +9,7 @@ public class BoardPanel extends JPanel {
     private final Board board;
     private final int boardSize;
     private final long[][] bitboard;
+    private final GameLogic gameLogic;
 
     // Saves coordinates in pixels of the tiles in the board
     private final int[][][] tileboard;
@@ -20,6 +21,7 @@ public class BoardPanel extends JPanel {
     private int selectedPieceRow, selectedPieceColumn;
 
     private boolean inCheck;
+    private boolean inCheckmate;
 
     private final BufferedImage boardImg;
     private final Image wPawnImg, wKnightImg, wBishopImg, wRookImg, wQueenImg, wKingImg;
@@ -37,11 +39,13 @@ public class BoardPanel extends JPanel {
         this.board = board;
         this.boardSize = board.getBoardSize();
         this.bitboard = board.getBitboard();
+        this.gameLogic = gameLogic;
 
         tileboard = new int[boardSize][boardSize][2];
 
         this.selectedPiece = '0';
         this.inCheck = false;
+        this.inCheckmate = false;
         
         this.boardImg = boardImg;
 
@@ -80,6 +84,7 @@ public class BoardPanel extends JPanel {
                 int column = (e.getX() + TILE_OFFSET) / TILE_SIZE;
                 int row = (e.getY() + TILE_OFFSET) / TILE_SIZE;
                 
+                // Ckecks where the player clicked in the window
                 gameLogic.handleTileSelection(row, column);
 
                 selectedPiece = gameLogic.getSelectedPiece();
@@ -88,6 +93,7 @@ public class BoardPanel extends JPanel {
                 selectedPieceRow = gameLogic.getSelectedPieceRow();
                 selectedPieceColumn = gameLogic.getSelectedPieceColumn();
                 inCheck = gameLogic.getCheckStatus();
+                inCheckmate = gameLogic.getCheckmateStatus();
 
                 repaint();
             }
@@ -104,24 +110,16 @@ public class BoardPanel extends JPanel {
             g.drawImage(this.boardImg, 0, 0, this);
         }
 
+        if(this.inCheckmate) {
+            System.out.println("CHECKMATE!!!");
+            return;
+        }
+
         // Drawing check marked if king is in check
         if(this.selectedPiece != 'k' && this.inCheck) {
-            for(int row = 0; row < boardSize; row++) {
-                for(int column = 0; column < boardSize; column++) {
-                    if(board.isWhiteTurn()) {
-                        if((board.getWhiteKing() & bitboard[row][column]) != 0) {
-                            g.drawImage(this.redSquareImg, tileboard[row][column][0]+3, tileboard[row][column][1]+3, this);
-                            break;
-                        }
-                    }
-                    else {
-                        if((board.getBlackKing() & bitboard[row][column]) != 0) {
-                            g.drawImage(this.redSquareImg, tileboard[row][column][0]+3, tileboard[row][column][1]+3, this);
-                            break;
-                        }
-                    }
-                }  
-            }
+            int[] kingCoordinates = gameLogic.getKingCoordinates(board.getTurn());
+
+            g.drawImage(this.redSquareImg, tileboard[kingCoordinates[0]][kingCoordinates[1]][0]+3, tileboard[kingCoordinates[0]][kingCoordinates[1]][1]+3, this);
         }
 
         // Drawing selected piece marker

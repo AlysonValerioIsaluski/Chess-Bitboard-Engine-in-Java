@@ -20,7 +20,6 @@ abstract public class Knight {
         long possibleMoves = 0L;
 
         long whitePieces = board.getWhitePieces();
-            
         long blackPieces = board.getBlackPieces();
 
         long blockedPieces;
@@ -32,18 +31,85 @@ abstract public class Knight {
         // Testing each target tile individually
         long knightPosition = bitboard[knightRow][knightColumn];
 
-        possibleMoves |= (knightPosition << 17) & NOT_A; // Up Up Left
-        possibleMoves |= (knightPosition << 15) & NOT_H; // Up Up Right
+        // Up Up Left
+        if(!GameLogic.isMoveIllegal(board, color, 'n', knightRow, knightColumn, knightRow-2, knightColumn-1))
+            possibleMoves |= (knightPosition >>> 17) & NOT_H;
 
-        possibleMoves |= (knightPosition << 10) & NOT_AB; // Up Left Left
-        possibleMoves |= (knightPosition << 6) & NOT_GH; // Up Right Right
+        // Up Up Right
+        if(!GameLogic.isMoveIllegal(board, color, 'n', knightRow, knightColumn, knightRow-2, knightColumn+1))
+            possibleMoves |= (knightPosition >>> 15) & NOT_A; 
 
-        possibleMoves |= (knightPosition >>> 17) & NOT_H; // Down Down Right
-        possibleMoves |= (knightPosition >>> 15) & NOT_A; // Down Down Left
+        // Up Left Left
+        if(!GameLogic.isMoveIllegal(board, color, 'n', knightRow, knightColumn, knightRow-1, knightColumn-2))
+            possibleMoves |= (knightPosition >>> 10) & NOT_GH; 
 
-        possibleMoves |= (knightPosition >>> 10) & NOT_GH; // Down Right Right
-        possibleMoves |= (knightPosition >>> 6) & NOT_AB; // Down Left Left
+        // Up Right Right
+        if(!GameLogic.isMoveIllegal(board, color, 'n', knightRow, knightColumn, knightRow-1, knightColumn+2))
+            possibleMoves |= (knightPosition >>> 6) & NOT_AB;
+
+
+        // Down Left Left
+        if(!GameLogic.isMoveIllegal(board, color, 'n', knightRow, knightColumn, knightRow+1, knightColumn-2))
+            possibleMoves |= (knightPosition << 6) & NOT_GH; 
+
+        // Down Right Right
+        if(!GameLogic.isMoveIllegal(board, color, 'n', knightRow, knightColumn, knightRow+1, knightColumn+2))
+            possibleMoves |= (knightPosition << 10) & NOT_AB; 
+
+        // Down Down Left
+        if(!GameLogic.isMoveIllegal(board, color, 'n', knightRow, knightColumn, knightRow+2, knightColumn-1))
+            possibleMoves |= (knightPosition << 15) & NOT_H; 
+
+        // Down Down Right
+        if(!GameLogic.isMoveIllegal(board, color, 'n', knightRow, knightColumn, knightRow+2, knightColumn+1))
+            possibleMoves |= (knightPosition << 17) & NOT_A;
 
         return possibleMoves & ~blockedPieces;
+    }
+
+    public static long calculatePossibleCaptures(Board board, int knightRow, int knightColumn, char color) {
+        long[][] bitboard = board.getBitboard();
+        long possibleCaptures = 0L;
+
+        long whitePieces = board.getWhitePieces();
+        long blackPieces = board.getBlackPieces();
+
+        long blockedPieces;
+        if (color == 'w')
+            blockedPieces = whitePieces;
+        else
+            blockedPieces = blackPieces;
+
+
+        // Testing each target tile individually
+        long knightPosition = bitboard[knightRow][knightColumn];
+
+        // Up Up Left
+        possibleCaptures |= (knightPosition >>> 17) & NOT_H;
+
+        // Up Up Right
+        possibleCaptures |= (knightPosition >>> 15) & NOT_A;
+
+        // Up Left Left
+        possibleCaptures |= (knightPosition >>> 10) & NOT_GH; 
+
+        // Up Right Right
+        possibleCaptures |= (knightPosition >>> 6) & NOT_AB; 
+
+
+        // Down Left Left
+        possibleCaptures |= (knightPosition << 6) & NOT_GH; 
+
+        // Down Right Right
+        possibleCaptures |= (knightPosition << 10) & NOT_AB; 
+
+        // Down Down Left
+        possibleCaptures |= (knightPosition << 15) & NOT_A; 
+        
+        // Down Down Right
+        possibleCaptures |= (knightPosition << 17) & NOT_H;
+
+
+        return possibleCaptures & ~blockedPieces;
     }
 }

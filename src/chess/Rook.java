@@ -24,6 +24,97 @@ abstract public class Rook {
 
         int boardSize = board.getBoardSize();
 
+        // Left
+        int column = rookColumn;
+        while(column > 0) {
+            column--;
+
+            if((blockedPieces & bitboard[rookRow][column]) != 0)
+                break;
+            
+            if(GameLogic.isMoveIllegal(board, color, 'r', rookRow, rookColumn, rookRow, column))
+                continue;
+
+            possibleMoves |= bitboard[rookRow][column];
+
+            if((capturablePieces & bitboard[rookRow][column]) != 0)
+                break;
+        }
+
+        // Right
+        column = rookColumn;
+        while(column < boardSize-1) {
+            column++;
+
+            if((blockedPieces & bitboard[rookRow][column]) != 0)
+                break;
+
+            if(GameLogic.isMoveIllegal(board, color, 'r', rookRow, rookColumn, rookRow, column))
+                continue;
+
+            possibleMoves |= bitboard[rookRow][column];
+
+            if((capturablePieces & bitboard[rookRow][column]) != 0)
+                break;
+        }
+
+        // Up
+        int row = rookRow;
+        while(row > 0) {
+            row--;
+
+            if((blockedPieces & bitboard[row][rookColumn]) != 0)
+                break;
+
+            if(GameLogic.isMoveIllegal(board, color, 'r', rookRow, rookColumn, row, rookColumn))
+                continue;
+
+            possibleMoves |= bitboard[row][rookColumn];
+
+            if((capturablePieces & bitboard[row][rookColumn]) != 0)
+                break;
+        }
+
+        // Down
+        row = rookRow;
+        while(row < boardSize-1) {
+            row++;
+
+            if((blockedPieces & bitboard[row][rookColumn]) != 0)
+                break;
+
+            if(GameLogic.isMoveIllegal(board, color, 'r', rookRow, rookColumn, row, rookColumn))
+                continue;
+
+            possibleMoves |= bitboard[row][rookColumn];
+
+            if((capturablePieces & bitboard[row][rookColumn]) != 0)
+                break;
+        }
+
+        return possibleMoves;
+    }
+
+    public static long calculatePossibleCaptures(Board board, int rookRow, int rookColumn, char color) {
+        long[][] bitboard = board.getBitboard();
+        long possibleCaptures = 0L;
+
+        long whitePieces = board.getWhitePieces();
+        long blackPieces = board.getBlackPieces();
+        
+        long blockedPieces;
+        long capturablePieces;
+        if (color == 'w') {
+            blockedPieces = whitePieces;
+            capturablePieces = blackPieces;
+        }
+        else {
+            blockedPieces = blackPieces;
+            capturablePieces = whitePieces;
+        }
+
+        int boardSize = board.getBoardSize();
+
         // Up
         int column = rookColumn;
         while(column > 0) {
@@ -32,7 +123,7 @@ abstract public class Rook {
             if((blockedPieces & bitboard[rookRow][column]) != 0)
                 break;
 
-            possibleMoves |= bitboard[rookRow][column];
+            possibleCaptures |= bitboard[rookRow][column];
 
             if((capturablePieces & bitboard[rookRow][column]) != 0)
                 break;
@@ -46,7 +137,7 @@ abstract public class Rook {
             if((blockedPieces & bitboard[rookRow][column]) != 0)
                 break;
 
-            possibleMoves |= bitboard[rookRow][column];
+            possibleCaptures |= bitboard[rookRow][column];
 
             if((capturablePieces & bitboard[rookRow][column]) != 0)
                 break;
@@ -60,7 +151,7 @@ abstract public class Rook {
             if((blockedPieces & bitboard[row][rookColumn]) != 0)
                 break;
 
-            possibleMoves |= bitboard[row][rookColumn];
+            possibleCaptures |= bitboard[row][rookColumn];
 
             if((capturablePieces & bitboard[row][rookColumn]) != 0)
                 break;
@@ -74,12 +165,12 @@ abstract public class Rook {
             if((blockedPieces & bitboard[row][rookColumn]) != 0)
                 break;
 
-            possibleMoves |= bitboard[row][rookColumn];
+            possibleCaptures |= bitboard[row][rookColumn];
 
             if((capturablePieces & bitboard[row][rookColumn]) != 0)
                 break;
         }
 
-        return possibleMoves;
+        return possibleCaptures;
     }
 }

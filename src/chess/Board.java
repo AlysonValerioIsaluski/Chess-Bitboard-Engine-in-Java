@@ -2,10 +2,10 @@ package chess;
 
 public class Board {
     // Prevention of magic number
-    private final int boardSize = 8;
+    private final int boardSize;
 
     // Bitmap for tiles in board
-    private final long[][] bitboard = new long[boardSize][boardSize];
+    private final long[][] bitboard;
 
     // Bitmap for the location of those pieces on the board
     private long whitePawns;
@@ -23,19 +23,13 @@ public class Board {
     private long blackKing;
 
     // Additional rules
-    private boolean isWhiteTurn; // True if white's turn and false if black's turn
+    private char turn; // 'w' if it's white, 'b' if it's black
     private long enPassantTiles; // Tile behind capturable pawn used as reference
     private long castlingRightsTiles; // Tile two tiles away from king used as reference
 
     public Board() {
-        // Extracting bitmap for the tiles in the board to an 8x8 matrix
-        long tileAmmount = 0;
-        for(int row = 0; row < boardSize; row++) {
-            for(int column = 0; column < boardSize; column++) {
-                this.bitboard[row][column] = 1L << tileAmmount;
-                tileAmmount++;
-            }
-        }
+        this.boardSize = 8;
+        this.bitboard = this.initializeBitboard();
         
         // Setting pawns
         for(int column = 0; column < boardSize; column++) {
@@ -64,10 +58,63 @@ public class Board {
         this.blackKing = this.bitboard[0][4];
         
         // Additional rules
-        isWhiteTurn = true;
-        castlingRightsTiles = (this.whiteKing << 2 | this.whiteKing >> 2) | (this.blackKing << 2 | this.blackKing >> 2);
+        this.turn = 'w';
+        this.enPassantTiles = 0L;
+        this.castlingRightsTiles = (this.whiteKing << 2 | this.whiteKing >> 2) | (this.blackKing << 2 | this.blackKing >> 2);
     }
-    
+
+    public Board(long whitePawns, long whiteKnights, long whiteBishops,
+    long whiteRooks, long whiteQueens, long whiteKing,
+    long blackPawns, long blackKnights, long blackBishops, 
+    long blackRooks, long blackQueens, long blackKing, 
+    char turn, long enPassantTiles, long castlingRightsTiles) {
+        this.boardSize = 8;
+        this.bitboard = this.initializeBitboard();
+        
+        // White pieces
+        this.whitePawns = whitePawns;
+        this.whiteKnights = whiteKnights;
+        this.whiteBishops = whiteBishops;
+        this.whiteRooks = whiteRooks;
+        this.whiteQueens = whiteQueens;
+        this.whiteKing = whiteKing;
+
+        // Black pieces
+        this.blackPawns = blackPawns;
+        this.blackKnights = blackKnights;
+        this.blackBishops = blackBishops;
+        this.blackRooks = blackRooks;
+        this.blackQueens = blackQueens;
+        this.blackKing = blackKing;
+
+        // Additional rules
+        this.turn = turn;
+        this.enPassantTiles = enPassantTiles;
+        this.castlingRightsTiles = castlingRightsTiles;
+    }
+
+    public Board(Board other) {
+    this(other.getWhitePawns(), other.getWhiteKnights(), other.getWhiteBishops(),
+        other.getWhiteRooks(), other.getWhiteQueens(), other.getWhiteKing(),
+        other.getBlackPawns(), other.getBlackKnights(), other.getBlackBishops(), 
+        other.getBlackRooks(), other.getBlackQueens(), other.getBlackKing(), 
+        other.getTurn(), other.getEnpassantTiles(), other.getCastlingRightsTiles());
+}
+
+    private long[][] initializeBitboard() {
+        long tileAmmount = 0;
+        long[][] bitBoard = new long[this.boardSize][this.boardSize];
+        
+        for(int row = 0; row < boardSize; row++) {
+            for(int column = 0; column < boardSize; column++) {
+                bitBoard[row][column] = 1L << tileAmmount;
+                tileAmmount++;
+            }
+        }
+
+        return bitBoard;
+    }
+
     public long[][] getBitboard() {
         return this.bitboard;
     }
@@ -130,8 +177,8 @@ public class Board {
         this.blackRooks | this.blackQueens | this.blackKing;
     }
     
-    public boolean isWhiteTurn() {
-        return this.isWhiteTurn;
+    public char getTurn() {
+        return this.turn;
     }
 
     public long getCastlingRightsTiles() {
@@ -196,8 +243,8 @@ public class Board {
         this.blackKing = blackKing;
     }
 
-    public void setWhiteTurn(boolean isWhiteTurn) {
-        this.isWhiteTurn = isWhiteTurn;
+    public void setTurn(char turn) {
+        this.turn = turn;
     }
 
     public void setCastlingRightsTiles(long castlingRightsTiles) {
