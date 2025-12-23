@@ -1,5 +1,7 @@
 package chess;
 
+import java.util.ArrayList;
+
 public class GameLogic {
     private final Board board;
     private final int boardSize;
@@ -146,7 +148,7 @@ public class GameLogic {
         this.inCheck = isInCheck(this.board, turn);
         this.inCheckmate = isInCheckmate(this.board, turn);
         this.inStalemate = isInStalemate(this.board, turn);
-        this.insuficientMaterial = hasInsuficientMaterial(this.board);
+        this.insuficientMaterial = hasInsuficientMaterial(this.board, 'w') && hasInsuficientMaterial(this.board, 'b');
     }
     
     private static char getPieceTypeFromTile(Board board, int row, int column) {
@@ -351,32 +353,81 @@ public class GameLogic {
         return false;
     }
 
-    // Checks if a checkmate can ever happen in current position (eg. You can't checkmate a player with only a knight)
-    private static boolean hasInsuficientMaterial(Board board) {
-        // To do
-        return false;
-    }
+    // Checks if the player of that can ever checkmade, given a board position (eg. king and knight can't ever checkmate)
+    private static boolean hasInsuficientMaterial(Board board, char color) {
+        if (color == 'w') {
+            // If white has pawn, rook or queen, a checkmate is possible
+            if (board.getWhitePawns() != 0L || board.getWhiteRooks() != 0L || board.getWhiteQueens() != 0L)
+                return false;
 
-    // Gets kings row and column of that color
-    public static int[] getKingCoordinates(Board board, char color) {
-        int boardSize = board.getBoardSize();
-        long[][] bitboard = board.getBitboard();
-        
-        long king;
+            ArrayList<ArrayList<Integer>> knightCoordinates = getPieceCoordinates(board, color, 'n');
+            ArrayList<ArrayList<Integer>> bishopCoordinates = getPieceCoordinates(board, color, 'b');
 
-        if (color == 'w')
-            king = board.getWhiteKing();
-        else
-            king = board.getBlackKing();
+            // Checks if white can realistic checkmate with knights and bishops (3+ knights, 2+ bishops, knight and bishop can)
+            if (knightCoordinates.size() > 2 || bishopCoordinates.size() > 1 ||
+                !(knightCoordinates.isEmpty() || bishopCoordinates.isEmpty()))
+                return false;
+        }
+        else {
+            // If black has pawn, rook or queen, a checkmate is possible
+            if (board.getBlackPawns() != 0L || board.getBlackRooks() != 0L || board.getBlackQueens() != 0L)
+                return false;
 
-        for (int row = 0; row < boardSize; row++) {
-            for (int column = 0; column < boardSize; column++) {
-                if ((king & bitboard[row][column]) != 0)
-                    return new int[] {row, column};
-            }
+            ArrayList<ArrayList<Integer>> knightCoordinates = getPieceCoordinates(board, color, 'n');
+            ArrayList<ArrayList<Integer>> bishopCoordinates = getPieceCoordinates(board, color, 'b');
+
+            // Checks if black can realistic checkmate with knights and bishops (3+ knights, 2+ bishops, knight and bishop can)
+            if (knightCoordinates.size() > 2 || bishopCoordinates.size() > 1 ||
+                !(knightCoordinates.isEmpty() || bishopCoordinates.isEmpty()))
+                return false;
         }
 
-        return new int[] {0, 0};
+        return true;
+    }
+
+    // Gets piece's row and column for that color, for every instance of that piece
+    public static ArrayList<ArrayList<Integer>> getPieceCoordinates(Board board, char color, char pieceType) {
+        int boardSize = board.getBoardSize();
+        long[][] bitboard = board.getBitboard();
+        long piece;
+
+        // List of Lists of integers, to represent each instance of that piece, and it's coordinates in 2D
+        ArrayList<ArrayList<Integer>> pieceCoordinates = new ArrayList<>();
+
+        if (color == 'w') {
+            switch (pieceType) {
+                case 'p' -> piece = board.getWhitePawns();
+                case 'n' -> piece = board.getWhiteKnights();
+                case 'b' -> piece = board.getWhiteBishops();
+                case 'r' -> piece = board.getWhiteRooks();
+                case 'q' -> piece = board.getWhiteQueens();
+                case 'k' -> piece = board.getWhiteKing();
+                default -> piece = 0L;
+            }
+        } else {
+            switch (pieceType) {
+                case 'p' -> piece = board.getBlackPawns();
+                case 'n' -> piece = board.getBlackKnights();
+                case 'b' -> piece = board.getBlackBishops();
+                case 'r' -> piece = board.getBlackRooks();
+                case 'q' -> piece = board.getBlackQueens();
+                case 'k' -> piece = board.getBlackKing();
+                default -> piece = 0L;
+            }
+        }
+        
+        for (int row = 0; row < boardSize; row++) {
+            for (int column = 0; column < boardSize; column++) {
+                if ((piece & bitboard[row][column]) != 0) {
+                    ArrayList<Integer> coordinates = new ArrayList<>();
+                    coordinates.add(row);
+                    coordinates.add(column);
+                    pieceCoordinates.add(coordinates);
+                }
+            }
+        }
+        
+        return pieceCoordinates;
     }
 
     public char getSelectedPiece() {

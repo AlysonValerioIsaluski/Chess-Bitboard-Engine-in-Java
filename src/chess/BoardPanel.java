@@ -2,6 +2,7 @@ package chess;
 
 import java.awt.*;
 import java.awt.image.*;
+import java.util.ArrayList;
 import javax.swing.JPanel;
 
 public class BoardPanel extends JPanel {
@@ -126,10 +127,10 @@ public class BoardPanel extends JPanel {
         
         // Drawing check marker if king is in check
         if(this.inCheck) {
-            int[] kingCoordinates = GameLogic.getKingCoordinates(board, board.getTurn());
-            
-            g.drawImage(this.redSquareImg, tileboard[kingCoordinates[0]][kingCoordinates[1]][0]+3, tileboard[kingCoordinates[0]][kingCoordinates[1]][1]+3, this);
-            
+            ArrayList<ArrayList<Integer>> kingCoordinates = GameLogic.getPieceCoordinates(board, board.getTurn(), 'k');
+
+            g.drawImage(this.redSquareImg, tileboard[kingCoordinates.get(0).get(0)][kingCoordinates.get(0).get(1)][0]+3,
+                                           tileboard[kingCoordinates.get(0).get(0)][kingCoordinates.get(0).get(1)][1]+3, this);
             
             // Drawing markers under all checkmated players pieces if king is in checkmate
             if(this.inCheckmate) {
