@@ -1,0 +1,12 @@
+./chess/Rook.java
+./chess/Pawn.java
+./chess/GameLogic.java
+./chess/Queen.java
+./chess/BoardPanel.java
+./chess/GameWindow.java
+./chess/Board.java
+./chess/MoveGenerator.java
+./chess/Bishop.java
+./chess/Knight.java
+./chess/Main.java
+./chess/King.java

@@ -22,6 +22,7 @@ public class BoardPanel extends JPanel {
     private boolean inCheck;
     private boolean inCheckmate;
     private boolean inStalemate;
+    private boolean insuficientMaterial;
 
     private final BufferedImage boardImg;
     private final Image wPawnImg, wKnightImg, wBishopImg, wRookImg, wQueenImg, wKingImg;
@@ -95,6 +96,7 @@ public class BoardPanel extends JPanel {
                 inCheck = gameLogic.getCheckStatus();
                 inCheckmate = gameLogic.getCheckmateStatus();
                 inStalemate = gameLogic.getStalemateStatus();
+                insuficientMaterial = gameLogic.getInsuficientMaterialStatus();
 
                 repaint();
             }
@@ -113,7 +115,12 @@ public class BoardPanel extends JPanel {
 
         // Erasing pieces if there's an stalemate
         if(this.inStalemate) {
-            System.out.println("STALEMATE!");
+            System.out.println("DRAW BY STALEMATE!");
+            return;
+        }
+
+        if(this.insuficientMaterial) {
+            System.out.println("DRAW BY INSUFICIENT MATERIAL");
             return;
         }
         
@@ -172,9 +179,9 @@ public class BoardPanel extends JPanel {
                 for(int column = 0; column < boardSize; column++) {
                     if((this.selectedPiecePossibleMoves & bitboard[row][column]) != 0) {
                         if((this.enemyPieces & bitboard[row][column]) != 0) // capturable
-                        g.drawImage(this.orangeCircleImg, tileboard[row][column][0], tileboard[row][column][1], this);
+                            g.drawImage(this.orangeCircleImg, tileboard[row][column][0], tileboard[row][column][1], this);
                         else // not capturable
-                        g.drawImage(this.greenCircleImg, tileboard[row][column][0], tileboard[row][column][1], this);
+                            g.drawImage(this.greenCircleImg, tileboard[row][column][0], tileboard[row][column][1], this);
                     }
                 }
             }

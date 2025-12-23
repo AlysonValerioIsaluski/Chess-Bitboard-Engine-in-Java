@@ -115,6 +115,33 @@ public class Board {
         return bitBoard;
     }
 
+    public static void printBitboard(long bitboard) {
+        for (int row = 0; row < 8; row++) {
+            for (int column = 0; column < 8; column++) {
+                int index = row * 8 + column;
+                
+                // Check if the bit at this index is 1 or 0
+                long mask = 1L << index;
+                long bit = (bitboard & mask);
+                
+                if(bit != 0)
+                    bit = 1;
+                
+                System.out.printf("%d ", bit);
+            }
+
+            System.out.println();
+        }
+        System.out.println();
+    }
+
+    public static String getTileName(Integer row, int column) {
+        String[] letters = {"?", "?","a", "b", "c", "d", "e", "f", "g", "h", "?", "?"};
+
+        row = (Math.abs((row)-8));
+        return (letters[column+2] + row.toString());
+    }
+
     public long[][] getBitboard() {
         return this.bitboard;
     }

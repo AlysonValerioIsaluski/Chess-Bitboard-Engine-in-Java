@@ -22,8 +22,8 @@ public class GameWindow extends JFrame {
         this.board = board;
         this.gameLogic = gameLogic;
 
-        frameWidth = 1000;
-        frameHeight = 1000;
+        frameWidth = 830;
+        frameHeight = 860;
 
         // Setting window
         this.setTitle("Alyson's Chess Board");
