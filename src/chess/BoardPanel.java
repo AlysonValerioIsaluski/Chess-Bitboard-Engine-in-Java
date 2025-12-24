@@ -6,6 +6,10 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 
 public class BoardPanel extends JPanel {
+    // Interface to make promotion requests easier
+    @SuppressWarnings("unused")
+    private final PromotionListener promotionListener;
+
     // Bitmap for tiles in board
     private final Board board;
     private final int boardSize;
@@ -16,15 +20,20 @@ public class BoardPanel extends JPanel {
     private final int TILE_OFFSET = 64;
     private final int TILE_SIZE = 96;
 
+    // Atributes for piece selection
     private char selectedPiece;
     private long selectedPiecePossibleMoves, enemyPieces;
     private int selectedPieceRow, selectedPieceColumn;
 
+    // Game States
     private boolean inCheck;
     private boolean inCheckmate;
     private boolean inStalemate;
     private boolean insuficientMaterial;
+    
+    private char requestsPromotion;
 
+    // Sprites
     private final BufferedImage boardImg;
     private final Image wPawnImg, wKnightImg, wBishopImg, wRookImg, wQueenImg, wKingImg;
     private final Image bPawnImg, bKnightImg, bBishopImg, bRookImg, bQueenImg, bKingImg;
@@ -36,7 +45,10 @@ public class BoardPanel extends JPanel {
         Image bPawnImg, Image bKnightImg, Image bBishopImg,
         Image bRookImg, Image bQueenImg, Image bKingImg,
         Image greenCircleImg, Image orangeCircleImg,
-        Image greenSquareImg, Image redSquareImg) {
+        Image greenSquareImg, Image redSquareImg, PromotionListener promotionListener) {
+
+        int dimension = 9 * TILE_SIZE;
+        this.setPreferredSize(new Dimension(dimension, dimension));
        
         this.board = board;
         this.boardSize = board.getBoardSize();
@@ -48,6 +60,7 @@ public class BoardPanel extends JPanel {
         this.inCheck = false;
         this.inCheckmate = false;
         this.inStalemate = false;
+        this.requestsPromotion = '0';
         
         this.boardImg = boardImg;
 
@@ -69,6 +82,8 @@ public class BoardPanel extends JPanel {
         this.orangeCircleImg = orangeCircleImg;
         this.greenSquareImg = greenSquareImg;
         this.redSquareImg = redSquareImg;
+
+        this.promotionListener = promotionListener;
         
         // Alignment grid for displaying the pieces on the board
         for(int row = 0; row < boardSize; row++) {
@@ -82,18 +97,28 @@ public class BoardPanel extends JPanel {
         this.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
+                System.out.println("MOUSE CLICK AT (" + e.getX() + ", " + e.getY() + ")");
+
                 // Gets clicked tile
                 int column = (e.getX() + TILE_OFFSET) / TILE_SIZE;
                 int row = (e.getY() + TILE_OFFSET) / TILE_SIZE;
                 
-                // Ckecks where the player clicked in the window
-                gameLogic.handleTileSelection(row, column);
-
+                // Checks where the player clicked in the window
+                if(requestsPromotion == '0')
+                    gameLogic.handleTileSelection(row, column);
+                
+                requestsPromotion = gameLogic.getRequestsPromotion();
+                
+                if (requestsPromotion != '0')
+                    promotionListener.onPromotionRequest(requestsPromotion);
+                
+                // Game state updating
                 selectedPiece = gameLogic.getSelectedPiece();
                 selectedPiecePossibleMoves = gameLogic.getSelectedPiecePossibleMoves();
                 enemyPieces = gameLogic.getEnemyPieces();
                 selectedPieceRow = gameLogic.getSelectedPieceRow();
                 selectedPieceColumn = gameLogic.getSelectedPieceColumn();
+                
                 inCheck = gameLogic.getCheckStatus();
                 inCheckmate = gameLogic.getCheckmateStatus();
                 inStalemate = gameLogic.getStalemateStatus();
@@ -103,11 +128,25 @@ public class BoardPanel extends JPanel {
             }
         });
     }
-
+    
     // Displays the board and pieces, among other ui elements
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+
+        // Calculating centering offsets
+        int boardPixelSize = boardSize * TILE_SIZE; 
+        int offsetX = (getWidth() - boardPixelSize) / 2;
+        int offsetY = (getHeight() - boardPixelSize) / 2;
+
+        // Use these offsets when drawing squares and pieces
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                int x = offsetX + (c * TILE_SIZE);
+                int y = offsetY + (r * TILE_SIZE);
+                g.drawRect(x, y, TILE_SIZE, TILE_SIZE);
+            }
+        }
         
         // Drawing board
         if (this.boardImg != null) {
@@ -218,7 +257,6 @@ public class BoardPanel extends JPanel {
                     g.drawImage(this.bKingImg, tileboard[row][column][0], tileboard[row][column][1], this);
             }
         }
-
     }
 }
 

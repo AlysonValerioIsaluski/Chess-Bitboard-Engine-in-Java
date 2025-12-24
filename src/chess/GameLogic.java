@@ -16,6 +16,10 @@ public class GameLogic {
     private boolean inStalemate;
     private boolean insuficientMaterial;
 
+    private char requestsPromotion;
+    private int promotionColumn;
+    private int promotionOriginColumn;
+
     public GameLogic(Board board) {
         this.board = board;
         this.boardSize = board.getBoardSize();
@@ -26,6 +30,8 @@ public class GameLogic {
         this.inCheckmate = false;
         this.inStalemate = false;
         this.insuficientMaterial = false;
+
+        this.requestsPromotion = '0';
     }
 
     public void handleTileSelection(int row, int column) {
@@ -38,6 +44,61 @@ public class GameLogic {
             this.selectedPiece = '0';
             this.selectedPiecePossibleMoves = 0L;
         }
+    }
+
+    public void handlePromotionSelection(char promotionType) {
+        int row; int column = this.promotionColumn;
+
+        if(board.getTurn() == 'w') {
+            row = 0;
+
+            // If player has selected a tile with a piece capturable by the selected piece
+            if ((bitboard[row][column] & enemyPieces) != 0) {
+                char capturedPieceType = getPieceTypeFromTile(this.board, row, column);
+
+                if (capturedPieceType != '0')
+                    removePiece(this.board, capturedPieceType, row, column, 'b');
+            }
+
+            // Removes pawn about to promote
+            removePiece(this.board, 'p', row+1, this.promotionOriginColumn, 'w');
+
+            // Adds promoted piece to the promotion tile
+            addPiece(this.board, promotionType, row, column, 'w');
+            
+            board.setTurn('b');
+        }
+        else {
+            row = 7;
+
+            // If player has selected a tile with a piece capturable by the selected piece
+            if ((bitboard[row][column] & enemyPieces) != 0) {
+                char capturedPieceType = getPieceTypeFromTile(this.board, row, column);
+
+                if (capturedPieceType != '0')
+                    removePiece(this.board, capturedPieceType, row, column, 'w');
+            }
+
+            // Removes pawn about to promote
+            removePiece(this.board, 'p', row-1, this.promotionOriginColumn, 'b');
+
+            // Adds promoted piece to the promotion tile
+            addPiece(this.board, promotionType, row, column, 'b');
+            
+            board.setTurn('w');
+        }
+
+        // Game state updating
+        char turn = board.getTurn();
+        
+        this.inCheck = isInCheck(this.board, turn);
+        this.inCheckmate = isInCheckmate(this.board, turn);
+        this.inStalemate = isInStalemate(this.board, turn);
+        this.insuficientMaterial = hasInsuficientMaterial(this.board, 'w') && hasInsuficientMaterial(this.board, 'b');
+
+        this.selectedPiece = '0';
+        this.selectedPiecePossibleMoves = 0L;
+        this.requestsPromotion = '0';
     }
 
     private void selectTile(int row, int column) {
@@ -68,28 +129,44 @@ public class GameLogic {
                     this.selectedPiece = 'k';
                 
                 this.selectedPiecePossibleMoves = MoveGenerator.calculatePossibleMoves(this.selectedPiece, this.board, row, column, 'w');
+
+                this.requestsPromotion = '0';
             }
             
-            // If player has selected a tile which is a possible move for the selected piece 
+            // If player has selected a tile which is a possible move for the selected piece
             else if ((this.selectedPiecePossibleMoves & selectMask) != 0) {
-                // If player has selected a tile with a piece capturable by the selected piece
-                if ((selectMask & enemyPieces) != 0) {
-                    char capturedPieceType = getPieceTypeFromTile(this.board, row, column);
-
-                    if (capturedPieceType != '0')
-                        removePiece(this.board, capturedPieceType, selectMask, 'b');
+                // If player moves a pawn to the farthest row, it will trigger a pawn promotion
+                if(this.selectedPiece == 'p' && row == 0) {
+                    this.selectedPiece = '0';
+                    this.requestsPromotion = 'w';
+                    this.promotionColumn = column;
+                    this.promotionOriginColumn = selectedPieceColumn;
                 }
+                else {
+                    // If player has selected a tile with a piece capturable by the selected piece
+                    if ((selectMask & enemyPieces) != 0) {
+                        char capturedPieceType = getPieceTypeFromTile(this.board, row, column);
 
-                // Moves selected piece to target tile that is a possible move for that selected piece
-                movePiece(this.selectedPiece, selectedPieceRow, selectedPieceColumn, row, column, 'w');
-                
-                board.setTurn('b');
+                        if (capturedPieceType != '0')
+                            removePiece(this.board, capturedPieceType, row, column, 'b');
+                    }
+
+                    // Checks if pawn got to the farthest row, triggering promotion
+
+                    // Moves selected piece to target tile that is a possible move for that selected piece
+                    movePiece(this.selectedPiece, selectedPieceRow, selectedPieceColumn, row, column, 'w');
+                    
+                    board.setTurn('b');
+
+                    this.requestsPromotion = '0';
+                }
             }
             
             // If player has selected anything else, the selection will just clear
             else {
                 this.selectedPiece = '0';
                 this.selectedPiecePossibleMoves = 0L;
+                this.requestsPromotion = '0';
             }
         }
         
@@ -114,28 +191,42 @@ public class GameLogic {
                     this.selectedPiece = 'k';
                 
                 this.selectedPiecePossibleMoves = MoveGenerator.calculatePossibleMoves(this.selectedPiece, this.board, row, column, 'b');
+                
+                this.requestsPromotion = '0';
             }
             
             // If player has selected a tile which is a possible move for the selected piece 
             else if((this.selectedPiecePossibleMoves & selectMask) != 0) {
-                // If player has selected a tile with a piece capturable by the selected piece
-                if((selectMask & enemyPieces) != 0) {
-                    char capturedPieceType = GameLogic.getPieceTypeFromTile(this.board, row, column);
-                    
-                    if(capturedPieceType != '0')
-                        removePiece(this.board, capturedPieceType, selectMask, 'w');
+                // If player moves a pawn to the farthest row, it will trigger a pawn promotion
+                if(this.selectedPiece == 'p' && row == 7) {
+                    this.selectedPiece = '0';
+                    this.requestsPromotion = 'b';
+                    this.promotionColumn = column;
+                    this.promotionOriginColumn = selectedPieceColumn;
                 }
+                else {
+                    // If player has selected a tile with a piece capturable by the selected piece
+                    if((selectMask & enemyPieces) != 0) {
+                        char capturedPieceType = GameLogic.getPieceTypeFromTile(this.board, row, column);
+                        
+                        if(capturedPieceType != '0')
+                            removePiece(this.board, capturedPieceType, row, column, 'w');
+                    }
 
-                // Moves selected piece to target tile that is a possible move for that selected piece
-                movePiece(this.selectedPiece, selectedPieceRow, selectedPieceColumn, row, column, 'b');
-                
-                board.setTurn('w');
+                    // Moves selected piece to target tile that is a possible move for that selected piece
+                    movePiece(this.selectedPiece, selectedPieceRow, selectedPieceColumn, row, column, 'b');
+                    
+                    board.setTurn('w');
+
+                    this.requestsPromotion = '0';
+                }
             }
             
             // If player has selected anything else, the selection will just clear
             else {
                 this.selectedPiece = '0';
                 this.selectedPiecePossibleMoves = 0L;
+                this.requestsPromotion = '0';
             }
         }
         
@@ -175,6 +266,11 @@ public class GameLogic {
     }
 
     public void movePiece(char pieceType, int rowFrom, int columnFrom, int rowTo, int columnTo, char color) {
+        // Checks if the tile is in bounds
+        if ( rowFrom < 0 || rowFrom >= 8 || columnFrom < 0 || columnFrom >= 8 ||
+             rowTo < 0 || rowTo >= 8 || columnTo < 0 || columnTo >= 8)
+            return;
+
         // Mask that has previous and next piece tile placement
         long moveMask = bitboard[rowFrom][columnFrom] | bitboard[rowTo][columnTo];
 
@@ -203,7 +299,13 @@ public class GameLogic {
     this.selectedPiece = '0';
     }
 
-    public static void removePiece(Board board, char pieceType, long removeMask, char color) {
+    public static void removePiece(Board board, char pieceType, int row, int column, char color) {
+        // Checks if the tile is in bounds
+        if (row < 0 || row >= 8 || column < 0 || column >= 8)
+            return;
+
+        long removeMask = board.getBitboard()[row][column];
+
         if (color == 'w') {
             switch (pieceType) {
                 case 'p' -> board.setWhitePawns(board.getWhitePawns() ^ removeMask);
@@ -222,6 +324,35 @@ public class GameLogic {
                 case 'r' -> board.setBlackRooks(board.getBlackRooks() ^ removeMask);
                 case 'q' -> board.setBlackQueens(board.getBlackQueens() ^ removeMask);
                 case 'k' -> board.setBlackKing(board.getBlackKing() ^ removeMask);
+            }
+        }
+    }
+
+    public static void addPiece(Board board, char pieceType, int row, int column, char color) {
+        // Checks if the tile is in bounds
+        if (row < 0 || row >= 8 || column < 0 || column >= 8)
+            return;
+
+        long addMask = board.getBitboard()[row][column];
+
+        if (color == 'w') {
+            switch (pieceType) {
+                case 'p' -> board.setWhitePawns(board.getWhitePawns() ^ addMask);
+                case 'n' -> board.setWhiteKnights(board.getWhiteKnights() ^ addMask);
+                case 'b' -> board.setWhiteBishops(board.getWhiteBishops() ^ addMask);
+                case 'r' -> board.setWhiteRooks(board.getWhiteRooks() ^ addMask);
+                case 'q' -> board.setWhiteQueens(board.getWhiteQueens() ^ addMask);
+                case 'k' -> board.setWhiteKing(board.getWhiteKing() ^ addMask);
+            }
+        }
+        else {
+            switch (pieceType) {
+                case 'p' -> board.setBlackPawns(board.getBlackPawns() ^ addMask);
+                case 'n' -> board.setBlackKnights(board.getBlackKnights() ^ addMask);
+                case 'b' -> board.setBlackBishops(board.getBlackBishops() ^ addMask);
+                case 'r' -> board.setBlackRooks(board.getBlackRooks() ^ addMask);
+                case 'q' -> board.setBlackQueens(board.getBlackQueens() ^ addMask);
+                case 'k' -> board.setBlackKing(board.getBlackKing() ^ addMask);
             }
         }
     }
@@ -247,7 +378,7 @@ public class GameLogic {
             enemyColor = 'w';
 
         char capturedPieceType = getPieceTypeFromTile(board, rowTo, columnTo);
-        removePiece(ghostBoard, capturedPieceType, bitboard[rowTo][columnTo], enemyColor);
+        removePiece(ghostBoard, capturedPieceType, rowTo, columnTo, enemyColor);
 
         if (color == 'w') {
             switch (pieceType) {
@@ -464,5 +595,13 @@ public class GameLogic {
 
     public boolean getInsuficientMaterialStatus() {
         return insuficientMaterial;
+    }
+
+    public char getRequestsPromotion() {
+        return requestsPromotion;
+    }
+
+    public void setRequestsPromotion(char color) {
+        this.requestsPromotion = color;
     }
 }
