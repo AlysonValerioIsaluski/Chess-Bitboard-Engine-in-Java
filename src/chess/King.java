@@ -18,10 +18,18 @@ abstract public class King {
         long blackPieces = board.getBlackPieces();
         
         long blockedPieces;
-        if (color == 'w')
+        long castlingTiles;
+        int piecesRow;
+        if (color == 'w') {
             blockedPieces = whitePieces;
-        else
+            castlingTiles = board.getWhiteCastlingRightsTiles();
+            piecesRow = 7;
+        }
+        else {
             blockedPieces = blackPieces;
+            castlingTiles = board.getBlackCastlingRightsTiles();
+            piecesRow = 0;
+        }
         
         // Testing each target tile individually
         long kingPosition = bitboard[kingRow][kingColumn];
@@ -57,6 +65,23 @@ abstract public class King {
         // Down-Left
         if(!GameLogic.isMoveIllegal(board, color, 'k', kingRow, kingColumn, kingRow+1, kingColumn-1))
             possibleMoves |= (kingPosition << 7) & NOT_H;
+        
+        // If king is at starting column
+        if(kingColumn == 4) {
+            // O-O-O castle (has to check if castle is legal and no piece bewteen room and king)
+            if((castlingTiles & bitboard[piecesRow][kingColumn-2]) != 0L &&
+            !GameLogic.isMoveIllegal(board, color, 'k', kingRow, kingColumn, kingRow, kingColumn-1) &&
+            !GameLogic.isMoveIllegal(board, color, 'k', kingRow, kingColumn, kingRow, kingColumn-2) &&
+            ((whitePieces | blackPieces) & (bitboard[piecesRow][kingColumn-1] | bitboard[piecesRow][kingColumn-3])) == 0L)
+                possibleMoves |= (kingPosition >> 2);
+    
+            // O-O castle (has to check if castle is legal and no piece bewteen room and king)
+            if((castlingTiles & bitboard[piecesRow][kingColumn+2]) != 0L &&
+            !GameLogic.isMoveIllegal(board, color, 'k', kingRow, kingColumn, kingRow, kingColumn+1) &&
+            !GameLogic.isMoveIllegal(board, color, 'k', kingRow, kingColumn, kingRow, kingColumn+2) &&
+            ((whitePieces | blackPieces) & bitboard[piecesRow][kingColumn+1]) == 0L)
+                possibleMoves |= (kingPosition << 2);
+        }
 
         return possibleMoves & ~blockedPieces;
     }

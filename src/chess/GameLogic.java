@@ -151,8 +151,6 @@ public class GameLogic {
                             removePiece(this.board, capturedPieceType, row, column, 'b');
                     }
 
-                    // Checks if pawn got to the farthest row, triggering promotion
-
                     // Moves selected piece to target tile that is a possible move for that selected piece
                     movePiece(this.selectedPiece, selectedPieceRow, selectedPieceColumn, row, column, 'w');
                     
@@ -279,9 +277,27 @@ public class GameLogic {
                 case 'p' -> board.setWhitePawns(board.getWhitePawns() ^ moveMask);
                 case 'n' -> board.setWhiteKnights(board.getWhiteKnights() ^ moveMask);
                 case 'b' -> board.setWhiteBishops(board.getWhiteBishops() ^ moveMask);
-                case 'r' -> board.setWhiteRooks(board.getWhiteRooks() ^ moveMask);
+                case 'r' -> {
+                    board.setWhiteRooks(board.getWhiteRooks() ^ moveMask);
+                    if(board.getWhiteCastlingRightsTiles() != 0L) {
+                        if(columnFrom == 0)
+                            board.setWhiteCastlingRightsTiles(board.getWhiteCastlingRightsTiles() & bitboard[7][6]);
+                        else if(columnFrom == 7)
+                            board.setWhiteCastlingRightsTiles(board.getWhiteCastlingRightsTiles() & bitboard[7][2]);
+                    }
+                }
                 case 'q' -> board.setWhiteQueens(board.getWhiteQueens() ^ moveMask);
-                case 'k' -> board.setWhiteKing(board.getWhiteKing() ^ moveMask);
+                case 'k' -> {
+                    board.setWhiteKing(board.getWhiteKing() ^ moveMask);
+                    board.setWhiteCastlingRightsTiles(0L);
+                    if(Math.abs(columnFrom - columnTo) >= 2) {
+                        if(columnTo == 2)
+                            // moves rook to the other side of the king
+                            movePiece('r', 7, 0, 7, 3, 'w');
+                        else
+                            movePiece('r', 7, 7, 7, 5, 'w');
+                    }
+                }
             }
         }
         else {
@@ -289,9 +305,27 @@ public class GameLogic {
                 case 'p' -> board.setBlackPawns(board.getBlackPawns() ^ moveMask);
                 case 'n' -> board.setBlackKnights(board.getBlackKnights() ^ moveMask);
                 case 'b' -> board.setBlackBishops(board.getBlackBishops() ^ moveMask);
-                case 'r' -> board.setBlackRooks(board.getBlackRooks() ^ moveMask);
+                case 'r' -> {
+                    board.setBlackRooks(board.getBlackRooks() ^ moveMask);
+                    if(board.getBlackCastlingRightsTiles() != 0L) {
+                        if(columnFrom == 0)
+                            board.setBlackCastlingRightsTiles(board.getBlackCastlingRightsTiles() & bitboard[0][6]);
+                        else if(columnFrom == 7)
+                            board.setBlackCastlingRightsTiles(board.getBlackCastlingRightsTiles() & bitboard[0][2]);
+                    }
+                }
                 case 'q' -> board.setBlackQueens(board.getBlackQueens() ^ moveMask);
-                case 'k' -> board.setBlackKing(board.getBlackKing() ^ moveMask);
+                case 'k' -> { 
+                    board.setBlackKing(board.getBlackKing() ^ moveMask);
+                    board.setBlackCastlingRightsTiles(0L);
+                    if(Math.abs(columnFrom - columnTo) >= 2) {
+                        if(columnTo == 2)
+                            // moves rook to the other side of the king
+                            movePiece('r', 0, 0, 0, 3, 'b');
+                        else
+                            movePiece('r', 0, 7, 0, 5, 'b');
+                    }
+                }
             }
         }
 
@@ -338,7 +372,7 @@ public class GameLogic {
         if (color == 'w') {
             switch (pieceType) {
                 case 'p' -> board.setWhitePawns(board.getWhitePawns() ^ addMask);
-                case 'n' -> board.setWhiteKnights(board.getWhiteKnights() ^ addMask);
+                case 'n' -> board.setWhiteKnights(board.getWhiteKnights() ^ addMask);   
                 case 'b' -> board.setWhiteBishops(board.getWhiteBishops() ^ addMask);
                 case 'r' -> board.setWhiteRooks(board.getWhiteRooks() ^ addMask);
                 case 'q' -> board.setWhiteQueens(board.getWhiteQueens() ^ addMask);
@@ -369,6 +403,10 @@ public class GameLogic {
         long[][] bitboard = board.getBitboard();
 
         long moveMask = bitboard[rowFrom][columnFrom] | bitboard[rowTo][columnTo];
+
+        // checks if player wants to castle when in check, retuning illegal if that's the case
+        if(pieceType == 'k' && Math.abs(columnTo - columnFrom) >= 2 && isInCheck(board, color))
+            return true;
 
         // Removes hipothetically captured piece, so that it doesn't count for legality
         char enemyColor;

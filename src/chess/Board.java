@@ -25,7 +25,8 @@ public class Board {
     // Additional rules
     private char turn; // 'w' if it's white, 'b' if it's black
     private long enPassantTiles; // Tile behind capturable pawn used as reference
-    private long castlingRightsTiles; // Tile two tiles away from king used as reference
+    private long whiteCastlingRightsTiles; // Tile two tiles away from king used as reference
+    private long blackCastlingRightsTiles; // Tile two tiles away from king used as reference
 
     public Board() {
         this.boardSize = 8;
@@ -60,14 +61,16 @@ public class Board {
         // Additional rules
         this.turn = 'w';
         this.enPassantTiles = 0L;
-        this.castlingRightsTiles = (this.whiteKing << 2 | this.whiteKing >> 2) | (this.blackKing << 2 | this.blackKing >> 2);
+        this.whiteCastlingRightsTiles = this.whiteKing << 2 | this.whiteKing >> 2;
+        this.blackCastlingRightsTiles = this.blackKing << 2 | this.blackKing >> 2;
     }
 
     public Board(long whitePawns, long whiteKnights, long whiteBishops,
     long whiteRooks, long whiteQueens, long whiteKing,
     long blackPawns, long blackKnights, long blackBishops, 
     long blackRooks, long blackQueens, long blackKing, 
-    char turn, long enPassantTiles, long castlingRightsTiles) {
+    char turn, long enPassantTiles,
+    long whiteCastlingRightsTiles, long blackCastlingRightsTiles) {
         this.boardSize = 8;
         this.bitboard = this.initializeBitboard();
         
@@ -90,7 +93,8 @@ public class Board {
         // Additional rules
         this.turn = turn;
         this.enPassantTiles = enPassantTiles;
-        this.castlingRightsTiles = castlingRightsTiles;
+        this.whiteCastlingRightsTiles = whiteCastlingRightsTiles;
+        this.blackCastlingRightsTiles = blackCastlingRightsTiles;
     }
 
     public Board(Board other) {
@@ -98,7 +102,8 @@ public class Board {
         other.getWhiteRooks(), other.getWhiteQueens(), other.getWhiteKing(),
         other.getBlackPawns(), other.getBlackKnights(), other.getBlackBishops(), 
         other.getBlackRooks(), other.getBlackQueens(), other.getBlackKing(), 
-        other.getTurn(), other.getEnpassantTiles(), other.getCastlingRightsTiles());
+        other.getTurn(), other.getEnpassantTiles(),
+        other.getWhiteCastlingRightsTiles(), other.getBlackCastlingRightsTiles());
 }
 
     private long[][] initializeBitboard() {
@@ -208,8 +213,12 @@ public class Board {
         return this.turn;
     }
 
-    public long getCastlingRightsTiles() {
-        return this.castlingRightsTiles;
+    public long getWhiteCastlingRightsTiles() {
+        return this.whiteCastlingRightsTiles;
+    }
+
+    public long getBlackCastlingRightsTiles() {
+        return this.blackCastlingRightsTiles;
     }
 
     public long getEnpassantTiles() {
@@ -219,8 +228,6 @@ public class Board {
     public int getBoardSize() {
         return this.boardSize;
     }
-
-
 
     public void setWhitePawns(long whitePawns) {
         this.whitePawns = whitePawns;
@@ -274,8 +281,12 @@ public class Board {
         this.turn = turn;
     }
 
-    public void setCastlingRightsTiles(long castlingRightsTiles) {
-        this.castlingRightsTiles = castlingRightsTiles;
+    public void setWhiteCastlingRightsTiles(long castlingRightsTiles) {
+        this.whiteCastlingRightsTiles = castlingRightsTiles;
+    }
+
+    public void setBlackCastlingRightsTiles(long castlingRightsTiles) {
+        this.blackCastlingRightsTiles = castlingRightsTiles;
     }
 
     public void setEnpassantTiles(long enPassantTiles) {

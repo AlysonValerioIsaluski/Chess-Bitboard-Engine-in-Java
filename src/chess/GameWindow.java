@@ -17,7 +17,7 @@ public class GameWindow extends JFrame implements PromotionListener {
     // Declarations used to contain the board
     private final JPanel container;
     private final BoardPanel boardPanel;
-    private JPanel promotionPanel;
+    private final JPanel promotionPanel;
     
     private final Board board;
     private final GameLogic gameLogic;
