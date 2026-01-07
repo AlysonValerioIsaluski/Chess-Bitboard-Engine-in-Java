@@ -68,14 +68,14 @@ abstract public class King {
         
         // If king is at starting column
         if(kingColumn == 4) {
-            // O-O-O castle (has to check if castle is legal and no piece bewteen room and king)
+            // O-O-O castle (has to check if castle is legal and no piece between rook and king)
             if((castlingTiles & bitboard[piecesRow][kingColumn-2]) != 0L &&
             !GameLogic.isMoveIllegal(board, color, 'k', kingRow, kingColumn, kingRow, kingColumn-1) &&
             !GameLogic.isMoveIllegal(board, color, 'k', kingRow, kingColumn, kingRow, kingColumn-2) &&
             ((whitePieces | blackPieces) & (bitboard[piecesRow][kingColumn-1] | bitboard[piecesRow][kingColumn-3])) == 0L)
                 possibleMoves |= (kingPosition >> 2);
     
-            // O-O castle (has to check if castle is legal and no piece bewteen room and king)
+            // O-O castle (has to check if castle is legal and no piece between rook and king)
             if((castlingTiles & bitboard[piecesRow][kingColumn+2]) != 0L &&
             !GameLogic.isMoveIllegal(board, color, 'k', kingRow, kingColumn, kingRow, kingColumn+1) &&
             !GameLogic.isMoveIllegal(board, color, 'k', kingRow, kingColumn, kingRow, kingColumn+2) &&

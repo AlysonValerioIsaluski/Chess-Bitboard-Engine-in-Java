@@ -97,7 +97,7 @@ public class BoardPanel extends JPanel {
         this.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                System.out.println("MOUSE CLICK AT (" + e.getX() + ", " + e.getY() + ")");
+                // System.out.println("MOUSE CLICK AT (" + e.getX() + ", " + e.getY() + ")"); // gets pixel position of mouse click
 
                 // Gets clicked tile
                 int column = (e.getX() + TILE_OFFSET) / TILE_SIZE;
@@ -218,9 +218,10 @@ public class BoardPanel extends JPanel {
             for(int row = 0; row < boardSize; row++) {
                 for(int column = 0; column < boardSize; column++) {
                     if((this.selectedPiecePossibleMoves & bitboard[row][column]) != 0) {
-                        if((this.enemyPieces & bitboard[row][column]) != 0) // capturable
+                        if(((this.enemyPieces & bitboard[row][column]) != 0) ||
+                        (this.selectedPiece == 'p' && (board.getEnpassantTiles() & bitboard[row][column]) != 0)) // capturable
                             g.drawImage(this.orangeCircleImg, tileboard[row][column][0], tileboard[row][column][1], this);
-                        else // not capturable
+                        else // non capturable
                             g.drawImage(this.greenCircleImg, tileboard[row][column][0], tileboard[row][column][1], this);
                     }
                 }

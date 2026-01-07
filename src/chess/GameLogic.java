@@ -150,6 +150,9 @@ public class GameLogic {
                         if (capturedPieceType != '0')
                             removePiece(this.board, capturedPieceType, row, column, 'b');
                     }
+                    // Handles en passant removing the enemy pawn
+                    else if((selectMask & board.getEnpassantTiles()) != 0L)
+                        removePiece(this.board, 'p', row+1, column, 'b');
 
                     // Moves selected piece to target tile that is a possible move for that selected piece
                     movePiece(this.selectedPiece, selectedPieceRow, selectedPieceColumn, row, column, 'w');
@@ -194,7 +197,7 @@ public class GameLogic {
             }
             
             // If player has selected a tile which is a possible move for the selected piece 
-            else if((this.selectedPiecePossibleMoves & selectMask) != 0) {
+            else if((this.selectedPiecePossibleMoves & selectMask) != 0L) {
                 // If player moves a pawn to the farthest row, it will trigger a pawn promotion
                 if(this.selectedPiece == 'p' && row == 7) {
                     this.selectedPiece = '0';
@@ -203,13 +206,16 @@ public class GameLogic {
                     this.promotionOriginColumn = selectedPieceColumn;
                 }
                 else {
-                    // If player has selected a tile with a piece capturable by the selected piece
-                    if((selectMask & enemyPieces) != 0) {
+                    // If player has selected a tile with a piece capturable by the selected piece, it will remove it
+                    if((selectMask & enemyPieces) != 0L) {
                         char capturedPieceType = GameLogic.getPieceTypeFromTile(this.board, row, column);
                         
                         if(capturedPieceType != '0')
                             removePiece(this.board, capturedPieceType, row, column, 'w');
                     }
+                    // Handles en passant removing the enemy pawn
+                    else if(this.selectedPiece == 'p' && (selectMask & board.getEnpassantTiles()) != 0L)
+                        removePiece(this.board, 'p', row-1, column, 'w');
 
                     // Moves selected piece to target tile that is a possible move for that selected piece
                     movePiece(this.selectedPiece, selectedPieceRow, selectedPieceColumn, row, column, 'b');
@@ -271,10 +277,17 @@ public class GameLogic {
 
         // Mask that has previous and next piece tile placement
         long moveMask = bitboard[rowFrom][columnFrom] | bitboard[rowTo][columnTo];
+        // After a move has been made, the en passant is no longer available
+        board.setEnpassantTiles(0L);
 
         if (color == 'w') {
             switch (pieceType) {
-                case 'p' -> board.setWhitePawns(board.getWhitePawns() ^ moveMask);
+                case 'p' -> {
+                    board.setWhitePawns(board.getWhitePawns() ^ moveMask);
+                    if(rowFrom - rowTo == 2) {
+                        board.setEnpassantTiles(bitboard[rowFrom - 1][columnFrom]);
+                    }
+                }
                 case 'n' -> board.setWhiteKnights(board.getWhiteKnights() ^ moveMask);
                 case 'b' -> board.setWhiteBishops(board.getWhiteBishops() ^ moveMask);
                 case 'r' -> {
@@ -302,7 +315,12 @@ public class GameLogic {
         }
         else {
             switch (pieceType) {
-                case 'p' -> board.setBlackPawns(board.getBlackPawns() ^ moveMask);
+                case 'p' -> {
+                    board.setBlackPawns(board.getBlackPawns() ^ moveMask);
+                    if(rowTo - rowFrom == 2) {
+                        board.setEnpassantTiles(bitboard[rowFrom + 1][columnFrom]);
+                    }
+                }
                 case 'n' -> board.setBlackKnights(board.getBlackKnights() ^ moveMask);
                 case 'b' -> board.setBlackBishops(board.getBlackBishops() ^ moveMask);
                 case 'r' -> {
@@ -415,8 +433,18 @@ public class GameLogic {
         else
             enemyColor = 'w';
 
-        char capturedPieceType = getPieceTypeFromTile(board, rowTo, columnTo);
-        removePiece(ghostBoard, capturedPieceType, rowTo, columnTo, enemyColor);
+        // Handles en passant removing the pawn in front
+        if((board.getEnpassantTiles() & bitboard[rowTo][columnTo]) != 0) {
+            if(enemyColor == 'w')
+                removePiece(ghostBoard, 'p', rowTo-1, columnTo, enemyColor);
+            else
+                removePiece(ghostBoard, 'p', rowTo+1, columnTo, enemyColor);
+        }
+        else {
+            char capturedPieceType = getPieceTypeFromTile(board, rowTo, columnTo);
+            removePiece(ghostBoard, capturedPieceType, rowTo, columnTo, enemyColor);
+        }
+            
 
         if (color == 'w') {
             switch (pieceType) {

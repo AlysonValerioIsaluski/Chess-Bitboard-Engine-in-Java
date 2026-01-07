@@ -12,12 +12,14 @@ abstract public class Pawn {
         long blackPieces = board.getBlackPieces();
 
         long blockedPieces;
-        long capturablePieces;
+        // Handles en passant as possible move
+        long capturablePieces = board.getEnpassantTiles();
         int boardSize = board.getBoardSize();
         
         if (color == 'w') {
             blockedPieces = whitePieces;
-            capturablePieces = blackPieces;
+            capturablePieces |= blackPieces;
+            
 
             // Checks if there are capturable pieces on the diagonal
             if((pawnColumn != 0 && (capturablePieces & bitboard[pawnRow-1][pawnColumn-1]) != 0) &&
@@ -48,7 +50,7 @@ abstract public class Pawn {
         }
         else {
             blockedPieces = blackPieces;
-            capturablePieces = whitePieces;
+            capturablePieces |= whitePieces;
 
             // Checks if there are capturable pieces on the diagonal
             if((pawnColumn != 0 && (capturablePieces & bitboard[pawnRow+1][pawnColumn-1]) != 0) &&
