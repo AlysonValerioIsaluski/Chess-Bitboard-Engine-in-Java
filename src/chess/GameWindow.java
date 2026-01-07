@@ -1,7 +1,9 @@
 package chess;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -15,9 +17,14 @@ import javax.swing.*;
 
 public class GameWindow extends JFrame implements PromotionListener {
     // Declarations used to contain the board
-    private final JPanel container;
     private final BoardPanel boardPanel;
+    private final JPanel container;
+
     private final JPanel promotionPanel;
+
+    private final JPanel endGamePanel;
+    private final JLabel mainMessageLabel;
+    private final JLabel subMessageLabel;
     
     private final Board board;
     private final GameLogic gameLogic;
@@ -101,6 +108,33 @@ public class GameWindow extends JFrame implements PromotionListener {
         gbc.anchor = GridBagConstraints.CENTER;
         container.add(layeredPane, gbc);
 
+        endGamePanel = new JPanel();
+        endGamePanel.setLayout(new BoxLayout(endGamePanel, BoxLayout.Y_AXIS));
+        endGamePanel.setBackground(new Color(255, 255, 255, 220)); // Same as promotion
+        endGamePanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+
+        // Setting up Labels
+        mainMessageLabel = new JLabel("CHECKMATE");
+        mainMessageLabel.setFont(new Font("Arial", Font.BOLD, 48));
+        mainMessageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        subMessageLabel = new JLabel("White wins");
+        subMessageLabel.setFont(new Font("Arial", Font.PLAIN, 24));
+        subMessageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        endGamePanel.add(Box.createVerticalGlue());
+        endGamePanel.add(mainMessageLabel);
+        endGamePanel.add(subMessageLabel);
+        endGamePanel.add(Box.createVerticalGlue());
+
+        // Centering it on the board
+        int endWidth = 400;
+        int endHeight = 200;
+        endGamePanel.setBounds((boardDim / 2) - (endWidth / 2), (boardDim / 2) - (endHeight / 2), endWidth, endHeight);
+        endGamePanel.setVisible(false);
+
+        layeredPane.add(endGamePanel, Integer.valueOf(2));
+
         this.add(container);
         this.pack();
         this.setLocationRelativeTo(null);
@@ -157,11 +191,32 @@ public class GameWindow extends JFrame implements PromotionListener {
                     gameLogic.handlePromotionSelection(pieceType);
                     promotionPanel.setVisible(false);
                     boardPanel.repaint();
+
+                    // Checks if the game ended after promoting
+                    if(gameLogic.getStalemateStatus())
+                        showEndGameScreen("DRAW", "by stalemate");
+
+                    else if(gameLogic.getInsuficientMaterialStatus())
+                        showEndGameScreen("DRAW", "by insufficient material");
+                    
+                    else if(gameLogic.getCheckmateStatus()) {
+                        String winner = (board.getTurn() == 'w') ? "Black wins" : "White wins";
+                        showEndGameScreen("CHECKMATE", winner);
+                    }
                 }
             });
             promotionPanel.add(label);
         }
         promotionPanel.revalidate();
         promotionPanel.setVisible(true);
+    }
+
+    public void showEndGameScreen(String mainMsg, String subMsg) {
+        mainMessageLabel.setText(mainMsg);
+        subMessageLabel.setText(subMsg);
+        endGamePanel.setVisible(true);
+        
+        // Disabling the board panel so no more moves can be made
+        boardPanel.setEnabled(false); 
     }
 }

@@ -550,7 +550,7 @@ public class GameLogic {
         return false;
     }
 
-    // Checks if the player of that can ever checkmade, given a board position (eg. king and knight can't ever checkmate)
+    // Checks if the player of that color can ever checkmade, given a board position (eg. king and knight can't ever checkmate)
     private static boolean hasInsuficientMaterial(Board board, char color) {
         if (color == 'w') {
             // If white has pawn, rook or queen, a checkmate is possible

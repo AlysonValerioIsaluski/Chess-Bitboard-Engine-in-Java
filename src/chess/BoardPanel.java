@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.image.*;
 import java.util.ArrayList;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 public class BoardPanel extends JPanel {
     // Interface to make promotion requests easier
@@ -153,19 +154,14 @@ public class BoardPanel extends JPanel {
             g.drawImage(this.boardImg, 0, 0, this);
         }
 
-        // Erasing pieces if there's an stalemate
-        if(this.inStalemate) {
-            System.out.println("DRAW BY STALEMATE!");
-            return;
-        }
+        if(this.inStalemate)
+            ((GameWindow)SwingUtilities.getWindowAncestor(this)).showEndGameScreen("DRAW", "by stalemate");
 
-        if(this.insuficientMaterial) {
-            System.out.println("DRAW BY INSUFICIENT MATERIAL");
-            return;
-        }
+        else if(this.insuficientMaterial)
+            ((GameWindow)SwingUtilities.getWindowAncestor(this)).showEndGameScreen("DRAW", "by insufficient material");
         
         // Drawing check marker if king is in check
-        if(this.inCheck) {
+        else if(this.inCheck) {
             ArrayList<ArrayList<Integer>> kingCoordinates = GameLogic.getPieceCoordinates(board, board.getTurn(), 'k');
 
             g.drawImage(this.redSquareImg, tileboard[kingCoordinates.get(0).get(0)][kingCoordinates.get(0).get(1)][0]+3,
@@ -173,7 +169,8 @@ public class BoardPanel extends JPanel {
             
             // Drawing markers under all checkmated players pieces if king is in checkmate
             if(this.inCheckmate) {
-                System.out.println("CHECKMATE!");
+                String winner = (board.getTurn() == 'w') ? "Black wins" : "White wins";
+                ((GameWindow)SwingUtilities.getWindowAncestor(this)).showEndGameScreen("CHECKMATE", winner);
                 
                 if(board.getTurn() == 'w') {
                     for(int row = 0; row < boardSize; row++) {
