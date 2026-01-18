@@ -6,7 +6,7 @@ Este projeto é um motor de xadrez desenvolvido em Java, focado em alta performa
 > Detalhes Técnicos
 
 * **Representação por Bitboards:** O estado do tabuleiro é armazenado em primitivas `long` de 64 bits. Cada bit representa uma casa, permitindo o uso de operações como `AND`, `OR`, `XOR` e `Shifts` para calcular movimentos possíveis de forma extremamente rápida.
-* **Eficiência de Memória:** Ao minimizar a criação de objetos e focar em tipos primitivos, a engine reduz a pressão sobre o *Garbage Collector*, garantindo latência mínima e alta performance em cálculos de busca profunda.
+* **Eficiência de Memória:** Ao minimizar a criação de objetos e focar em tipos primitivos, a engine reduz a pressão sobre o Garbage Collector, garantindo latência mínima e alta performance em cálculos de busca profunda.
 * **Regras Completas (FIDE):**
   * Movimentação legal de todas as peças.
   * Roque (Castling) e Captura En Passant.
